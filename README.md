@@ -7,5 +7,5 @@ Deploy the algo/strategy on Narwhal!
 
 Your alg/strategy trades for you.
 ```
-### Documentaion: Coming Soon! 
+### Documentation: Coming Soon! 
 [![KloudTrader](kloudtrader.png)](https://kloudtrader.com)
