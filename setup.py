@@ -11,9 +11,7 @@ setup(
     description="kloudTrader's in-house brewed library that makes it much easier for you to code algorithms that can trade for you.",
     long_description=open('README.md').read(),
     install_requires=[
-        "intrinio",
         "requests",
-        "boto3",
-        "streamz"
+        "boto3"
     ],
 )
