@@ -1,7 +1,6 @@
 import json
 import os
 from datetime import datetime
-
 import requests
 from botocore.docs import params
 
@@ -25,8 +24,6 @@ def get_content_headers():
 
     return headers
 
-
-
 '''Market Data'''
 
 def quotes(symbols, access_token=ACCESS_TOKEN):
@@ -35,8 +32,6 @@ def quotes(symbols, access_token=ACCESS_TOKEN):
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-
-
 
 def historical_prices(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
     params = {
@@ -65,16 +60,14 @@ def time_and_sales(symbol,start,end,interval='tick',access_token=ACCESS_TOKEN):
     
     start=start.replace(' ','%20')
     end=end.replace(' ','%20')
-    print(BROKERAGE_API_URL+"/v1/markets/timesales?symbol="+str(symbol)+"&start="+start+"&end="+end)
-    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales?symbol="+str(symbol)+str(interval)+"&start="+start+"&end="+end,headers=get_headers(access_token))
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales?symbol="+str(symbol)+str(interval)+"&start="+start+"&end="+end,headers=get_headers(access_token),stream=True)
     try:
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-
-
-
+    
+#print(time_and_sales('AAPL','2018-10-24','2018-10-26'))
 
 def market_calendar(month,year):
     params = {
@@ -88,16 +81,12 @@ def market_calendar(month,year):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-
-
 def symbol_search(company_name, indexes=True,access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/v1/markets/search?q="+str(company_name)+"&indexes="+str(indexes),headers=get_headers(access_token))
     try:
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-
-
 
 def symbol_lookup(symbol,access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/v1/markets/lookup?q="+str(symbol),headers=get_headers(access_token))
@@ -106,14 +95,12 @@ def symbol_lookup(symbol,access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-
 def company_fundamentals(symbol,access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/beta/markets/fundamentals/company?symbols="+str(symbol.upper()),headers=get_headers(access_token))
     try:
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-
 
 def corporate_calendar(symbols,access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/beta/markets/fundamentals/calendars?symbols="+str(symbols.upper()),headers=get_headers(access_token))
@@ -164,9 +151,6 @@ def price_statistics(symbols,access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-
-
-
 '''Live data'''
 def create_session(access_token=ACCESS_TOKEN):
     # creates a streaming session
@@ -179,7 +163,6 @@ def create_session(access_token=ACCESS_TOKEN):
         return sessionid
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-
 
 def live_quotes(symbols, sessionid):
     # gets market events

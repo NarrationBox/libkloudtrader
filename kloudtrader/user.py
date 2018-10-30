@@ -63,7 +63,6 @@ def account_positions(access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-print(account_positions(access_token="eCqH0Jcd9XphAbgf7Snt5FkNzI53",account_number="VA81788104"))
 
 
 def account_history(access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER):
