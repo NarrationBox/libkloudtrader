@@ -33,7 +33,7 @@ def quotes(symbols, access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-def historical_prices(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
+def OHLCV(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
     params = {
     'symbol': str(symbol.upper()),
     'start':str(start),
@@ -47,8 +47,48 @@ def historical_prices(symbol,start,end,interval='daily',access_token=ACCESS_TOKE
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
     
+def close_prices(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
+    data=OHLCV(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN)
+    try:
+        close_data=[dict(date=rows['date'], close=rows['close']) for rows in data['history']['day']]
+        return close_data
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-def intrday_status(access_token=ACCESS_TOKEN):
+def open_prices(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
+    data=OHLCV(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN)
+    try:
+        open_data=[dict(date=rows['date'], open=rows['open']) for rows in data['history']['day']]
+        return open_data
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def high_prices(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
+    data=OHLCV(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN)
+    try:
+        high_data=[dict(date=rows['date'], high=rows['high']) for rows in data['history']['day']]
+        return high_data
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def low_prices(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
+    data=OHLCV(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN)
+    try:
+        low_data=[dict(date=rows['date'], low=rows['low']) for rows in data['history']['day']]
+        return low_data
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+    
+def volume(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
+    data=OHLCV(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN)
+    try:
+        volume_data=[dict(date=rows['date'], volume=rows['volume']) for rows in data['history']['day']]
+        return volume_data
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+
+def intraday_status(access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/v1/markets/clock",headers=get_headers(access_token))
     try:
         return r.json()

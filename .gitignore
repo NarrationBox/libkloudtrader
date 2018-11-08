@@ -135,11 +135,14 @@ pip-selfcheck.json
 
 #misc
 test.py
+test2.py
 kloudtrader/analysis/__pycache__/
 kloudtrader/kloudtrader/analysis/__init__.pyc
 kloudtrader/kloudtrader/analysis/indicators.pyc
 kloudtrader/kloudtrader/equities/papertrade.py
 kloudtrader/kloudtrader/equities/strategies/*
+strategies/
+klodtrader/plotting
 
 # End of https://www.gitignore.io/api/python
 
