@@ -4,11 +4,6 @@ import requests
 import os
 
 BROKERAGE_API_URL="https://api.tradier.com"
-ACCESS_TOKEN = os.environ['TRADIER_ACCESS_TOKEN']
-CONSUMER_KEY=os.environ['TRADIER_CONSUMER_KEY']
-ACCOUNT_NUMBER=os.environ['TRADIER_ACCOUNT_NUMBER']
-
-
 
 def get_headers(access_token):
     headers = {"Accept":"application/json",

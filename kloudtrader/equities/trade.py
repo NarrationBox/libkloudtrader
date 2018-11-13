@@ -15,9 +15,7 @@ import os
 SANDBOX_API_URL="https://sandbox.tradier.com"
 BROKERAGE_API_URL="https://api.tradier.com"
 STREAMING_API_URL="https://stream.tradier.com"
-ACCESS_TOKEN = os.environ['TRADIER_ACCESS_TOKEN']
-CONSUMER_KEY=os.environ['TRADIER_CONSUMER_KEY']
-ACCOUNT_NUMBER=os.environ['TRADIER_ACCOUNT_NUMBER']
+
 
 
 

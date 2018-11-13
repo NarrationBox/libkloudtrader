@@ -24,11 +24,11 @@ def sms(number,message):
         raise ('Could not create an sms alert! Probabaly because you are running from your local machine. Push to your narwhal runtimeto make it work.')
 
 
-def email(email_id,message,sender="alerts@kloudtrader.com"):
+def email(email_id,message,sender="alerts@kloudtrader.com",subject="KloudTrader Narwhal Alerts"):
     SENDER = sender
     RECIPIENT = email_id
     AWS_REGION = os.environ['AWS_DEFAULT_REGION']
-    SUBJECT = "KloudTrader Narwhal Alerts"
+    SUBJECT = subject
     BODY_TEXT = message
     BODY_HTML = """<html>
     <head></head>
@@ -73,4 +73,3 @@ def sms_and_email(number,email_id,message):
     sms(number,message)
     email(email_id,message)
     
-
