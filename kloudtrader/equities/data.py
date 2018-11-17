@@ -3,11 +3,13 @@ import os
 from datetime import datetime
 import requests
 from botocore.docs import params
+from kloudtrader.defaults import ACCESS_TOKEN,ACCOUNT_NUMBER
 
 
 STREAMING_API_URL="https://stream.tradier.com"
 BROKERAGE_API_URL="https://api.tradier.com"
 SANDBOX_API_URL="https://sandbox.tradier.com"
+
 
 
 def get_headers(access_token):
@@ -94,11 +96,10 @@ def intraday_status(access_token=ACCESS_TOKEN):
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
 
-def time_and_sales(symbol,start,end,interval='tick',access_token=ACCESS_TOKEN):
+def time_and_sales(symbol,interval='tick',access_token=ACCESS_TOKEN):
     
-    start=start.replace(' ','%20')
-    end=end.replace(' ','%20')
-    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales?symbol="+str(symbol)+str(interval)+"&start="+start+"&end="+end,headers=get_headers(access_token),stream=True)
+
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales?symbol="+str(symbol),headers=get_headers(access_token),stream=True)
     try:
         return r.json()
     except:
