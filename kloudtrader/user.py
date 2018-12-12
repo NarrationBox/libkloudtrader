@@ -2,7 +2,7 @@ from time import sleep
 import json
 import requests 
 import os
-from kloudtrader.defaults import ACCESS_TOKEN,ACCOUNT_NUMBER
+from kloudtrader.defaults import *
 
 BROKERAGE_API_URL="https://api.tradier.com"
 
@@ -34,7 +34,6 @@ def user_account_number(access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code
         )
-
 
 
 def account_balance(access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER):
