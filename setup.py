@@ -13,14 +13,14 @@ setup(
     install_requires=[
         "requests",
         "boto3",
-        "ta",
-        "TA-Lib",
         "pandas",
         "numpy",
         "sklearn",
         "pyti",
         "scipy",
         "empyrical",
-        "tabulate"
+        "tabulate",
+         "ta",
+        "TA-Lib",
     ],
 )
