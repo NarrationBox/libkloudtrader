@@ -8,10 +8,19 @@ setup(
     packages=['kloudtrader'],
     url='https://github.com/KloudTrader/kloudtrader',
     license='LICENSE',
-    description="kloudTrader's in-house brewed library that makes it much easier for you to code algorithms that can trade for you.",
+    description="kloudTrader's in-house library that makes it much easier for you to code algorithms that can trade for you.",
     long_description=open('README.md').read(),
     install_requires=[
         "requests",
-        "boto3"
+        "boto3",
+        "ta",
+        "TA-Lib",
+        "pandas",
+        "numpy",
+        "sklearn",
+        "pyti",
+        "scipy",
+        "empyrical",
+        "tabulate"
     ],
 )
