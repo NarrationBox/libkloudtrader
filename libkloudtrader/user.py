@@ -2,7 +2,7 @@ from time import sleep
 import json
 import requests 
 import os
-from kloudtrader.defaults import *
+from libkloudtrader.defaults import *
 
 BROKERAGE_API_URL="https://api.tradier.com"
 
