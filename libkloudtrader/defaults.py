@@ -1,0 +1,3 @@
+import os 
+ACCESS_TOKEN=os.environ['ACCESS_TOKEN']
+ACCOUNT_NUMBER=os.environ['ACCOUNT_NUMBER']
