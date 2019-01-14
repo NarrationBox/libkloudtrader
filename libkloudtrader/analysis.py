@@ -978,8 +978,8 @@ def value_at_risk(close,tabular=True):
     except Exception as e:
         raise(e)
 
-aapl_data=pd.DataFrame(OHLCV('AAPL','1998-01-01','1999-01-01')['history']['day'])
-spy_data=pd.DataFrame(OHLCV('SPY','2018-01-01','2019-01-01')['history']['day'])
+#aapl_data=pd.DataFrame(OHLCV('AAPL','1998-01-01','1999-01-01')['history']['day'])
+#spy_data=pd.DataFrame(OHLCV('SPY','2018-01-01','2019-01-01')['history']['day'])
 
 
-print(cagr(100000,136009,2))
+#print(cagr(100000,136009,2))
