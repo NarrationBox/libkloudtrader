@@ -6,6 +6,8 @@ time_and_sales()
 options and multileg order support
 improve error and exception handling
 '''
+import sys
+sys.path.append("..")
 from time import sleep
 import json
 import requests 

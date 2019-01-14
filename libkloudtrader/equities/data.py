@@ -1,14 +1,18 @@
 import json
 import os
+import sys
 from datetime import datetime
+from time import sleep
 import requests
-from botocore.docs import params
-from libkloudtrader.defaults import ACCESS_TOKEN,ACCOUNT_NUMBER
+sys.path.append("..")
+from libkloudtrader.defaults import ACCESS_TOKEN, ACCOUNT_NUMBER
+
 
 
 STREAMING_API_URL="https://stream.tradier.com"
 BROKERAGE_API_URL="https://api.tradier.com"
 SANDBOX_API_URL="https://sandbox.tradier.com"
+
 
 
 
@@ -243,4 +247,3 @@ def live_trades(symbols, sessionid):
 
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-

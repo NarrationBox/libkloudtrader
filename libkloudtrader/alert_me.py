@@ -21,7 +21,7 @@ def sms(number,message):
         client.publish(Message=message, TopicArn=topicarn)
         print('SMS alert Created!')
     except Exception as e:
-        raise ('Could not create an sms alert! Probabaly because you are running from your local machine. Push to your narwhal runtimeto make it work.')
+        raise ('Could not create an sms alert! Probabaly because you are running from your local machine. Please Push to your narwhal runtime to make it work.')
 
 
 def email(email_id,message,sender="alerts@kloudtrader.com",subject="KloudTrader Narwhal Alerts"):

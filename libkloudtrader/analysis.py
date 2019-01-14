@@ -18,14 +18,13 @@ from tabulate import tabulate
 def accumulation_distribution_index(high,low,close,volume,fillna=False):
     try:
         adi_data=ta.volume.acc_dist_index(high, low, close, volume, fillna=fillna)
-        df=pd.DataFrame()
         return adi_data
     except Exception as e:
         raise (e)
         
 
 #Awesome Oscillator
-def awesome_oscillator(high,low,short_period,long_period,fillna=False):
+def awesome_oscillator(high,low,short_period=5,long_period=34,fillna=False):
     try:
         ao_data=ta.momentum.ao(high,low,short_period,long_period,fillna)
         return ao_data
@@ -80,18 +79,19 @@ def absolute_price_oscillator(close,short_period,long_period,matype=0):
     except Exception as e:
         raise(e)
 
-#Aroon Oscillator
+#Aroon 
 def aroon(high,low,n):
     try:
         aroondown, aroonup = talib.AROON(high, low, timeperiod=n)
         df=pd.DataFrame()
         df['aroondown']=aroondown
         df['aroonup']=aroonup
+        df['aroon_oscillator']=talib.AROONOSC(high, low, timeperiod=n)
         return df
     except Exception as e:
         raise(e)
 
-#Aroon Oscillator
+#Aroon
 def aroon_oscillator(high, low, n):
     try:
         aroon_osc_data=talib.AROONOSC(high, low, timeperiod=n)
@@ -148,7 +148,7 @@ def true_range(high, low, close):
         raise(e)
 
 #Balance of Power
-def balance_on_power(open, high, low, close):
+def balance_of_power(open, high, low, close):
     try:
         bop_data=talib.BOP(open, high, low, close)
         return bop_data
@@ -156,9 +156,9 @@ def balance_on_power(open, high, low, close):
         raise(e)
 
 #Bollinger Bands
-def bollinger_bands(close,n,nbdevup,nbdevdn,matype=0):
+def bollinger_bands(close,n=20,nbdevup=2,nbdevdn=2,matype=0):
     try:
-        upperband, middleband, lowerband = talib.BBANDS(close, timeperiod=5, nbdevup=nbdevup, nbdevdn=nbdevdn, matype=matype)
+        upperband, middleband, lowerband = talib.BBANDS(close, timeperiod=n, nbdevup=nbdevup, nbdevdn=nbdevdn, matype=matype)
         df=pd.DataFrame()
         df['upperband']=upperband
         df['middleband']=middleband
@@ -667,9 +667,9 @@ def two_crows(open, high, low, close):
     except Exception as e:
         raise(e)
 
-#Annual Returns (in percent)
-def annual_returns(close):
-    if len(close)<250 or len(close)>260:
+#Annual Return (in percent)
+def annual_return(close):
+    if len(close)<250 or len(close)>257:
         return "Close data has more or less entries than one year should have. Please use returns() function to calculate returns for n number of days."
         
     try:
@@ -677,8 +677,8 @@ def annual_returns(close):
         df=pd.DataFrame()
         df['daily_returns']=daily_returns(close)
         mean_daily_returns=df['daily_returns'].mean()
-        annual_returns=mean_daily_returns*trading_days
-        return annual_returns
+        annual_return=mean_daily_returns*trading_days
+        return annual_return
     except Exception as e:
         raise(e)
 
@@ -689,8 +689,8 @@ def returns(close):
         df=pd.DataFrame()
         df['daily_returns']=daily_returns(close)
         mean_daily_returns=df['daily_returns'].mean()
-        annual_returns=mean_daily_returns*trading_days
-        return annual_returns*100
+        returns_data=mean_daily_returns*trading_days
+        return returns_data*100
     except Exception as e:
         raise(e)
 
@@ -821,14 +821,6 @@ def annual_sharpe_ratio(close):
     except Exception as e:
         raise(e)
 
-#Cumulative Returns
-def cumulative_returns(close):
-    try:
-        dr_data=daily_returns(close)
-        cr_data=(1+dr_data).cumprod()
-        return cr_data
-    except Exception as e:
-        raise(e)
 
 #VWAP
 def vwap(high,low,close,volume):
@@ -986,9 +978,8 @@ def value_at_risk(close,tabular=True):
     except Exception as e:
         raise(e)
 
-df=pd.DataFrame(OHLCV('FB','2012-01-01','2018-01-31')['history']['day'])
-ef=pd.DataFrame(OHLCV('SPY','2015-01-01','2016-01-01')['history']['day'])
+aapl_data=pd.DataFrame(OHLCV('AAPL','1998-01-01','1999-01-01')['history']['day'])
+spy_data=pd.DataFrame(OHLCV('SPY','2018-01-01','2019-01-01')['history']['day'])
 
 
-
-print(value_at_risk(df['close'],False))
+print(cagr(100000,136009,2))
