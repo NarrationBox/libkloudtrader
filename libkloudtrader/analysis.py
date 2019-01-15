@@ -240,7 +240,7 @@ def directional_movement_index(high, low, close, n):
         raise(e)
 
 #Donchian Channels
-def donchian_channels(close,n,fillna=False):
+def donchian_channel(close,n,fillna=False):
     try:
         dc_high_band=ta.volatility.donchian_channel_hband(close,n,fillna)
         dc_high_band_indicator=ta.volatility.donchian_channel_hband_indicator(close,n,fillna)
@@ -355,13 +355,13 @@ def linear_regression_intercept(close,n):
 #Linear Regression Slope
 def linear_regression_slope(close,n):
     try:
-        lrs_data=talib.LINEARREG_SLOPE(close, timeperiod=14)
+        lrs_data=talib.LINEARREG_SLOPE(close, timeperiod=n)
         return lrs_data
     except Exception as e:
         raise(e)
 
 #Moving Average Convergence Divergence
-def macd(close, short_period, long_period, n_sign, fillna=False):
+def macd(close, n_sign, short_period=12, long_period=26, fillna=False):
     try:
         df=pd.DataFrame()
         df['macd']=ta.trend.macd(close, short_period, long_period, fillna)
@@ -489,7 +489,7 @@ def hilbert_transform_sine_wave(close):
     except Exception as e:
         raise(e)
 
-#Hilbert Transform - Sine Wave
+#Hilbert Transform - Trend vs cycle mode
 def hilbert_transform_trend_vs_cycle_mode(close):
     try:
         httc_data = talib.HT_TRENDMODE(close)
@@ -522,7 +522,7 @@ def percentage_price_oscillator(close, short_period, long_period, matype=0):
         raise(e)
 
 #Plus Directional Indicator
-def pulse_directional_indictaor(high, low, close,n):
+def plus_directional_indicator(high, low, close,n):
     try:
         pdi_data=talib.PLUS_DI(high, low, close, timeperiod=n)
         return pdi_data
@@ -530,7 +530,7 @@ def pulse_directional_indictaor(high, low, close,n):
         rasie(e)
 
 #Plus Directional Movement
-def pulse_directional_movement(high, low, close,n):
+def plus_directional_movement(high, low, close,n):
     try:
         pdm_data=talib.PLUS_DM(high, low, timeperiod=n)
         return pdm_data
@@ -566,12 +566,12 @@ def standard_deviation(close,n,nbdev=1):
         raise(e)
 
 #Stochastic RSI
-def stochastic_rsi(close, n, fastk_period, fastd_period, fastd_matype=0):
+def stochastic_rsi(close, n, fast_period1=5, fast_period2=3, fastd_matype=0):
     try:
-        fastk_data, fastd_data = talib.STOCHRSI(close, n, fastk_period, fastd_period, fastd_matype)
+        fastk_data, fastd_data = talib.STOCHRSI(close, n, fast_period1, fast_period2, fastd_matype)
         df=pd.DataFrame()
-        df['fastk']=fastk_data
-        df['fastd']=fastd_data
+        df['fast_period1']=fastk_data
+        df['fast_period2']=fastd_data
         return df
     except Exception as e:
         raise(e)
@@ -618,9 +618,9 @@ def typical_price(high, low, close):
         raise(e)
 
 #variance
-def variance(close, n, nbdev=1):
+def variance(data, n, nbdev=1):
     try:
-        var_data=talib.VAR(close, timeperiod=n, nbdev=nbdev)
+        var_data=talib.VAR(data, timeperiod=n, nbdev=nbdev)
         return var_data
     except Exception as e:
         raise(e)
@@ -690,7 +690,7 @@ def returns(close):
         df['daily_returns']=daily_returns(close)
         mean_daily_returns=df['daily_returns'].mean()
         returns_data=mean_daily_returns*trading_days
-        return returns_data*100
+        return returns_data
     except Exception as e:
         raise(e)
 
@@ -720,7 +720,6 @@ def annual_volatility(close):
 def volatility(close):
     try:
         trading_days=len(close)
-        print(trading_days)
         dr_data=daily_returns(close)
         av_data=np.std(dr_data)*np.sqrt(trading_days)
         return av_data
@@ -738,11 +737,11 @@ def moving_volatility(close,n):
         raise(e)
 
 #Chaikin Oscillator 
-def chaikin_oscillator(high,low,close,volume):
+def chaikin_oscillator(high,low,close,volume,short_period=3,long_period=10):
     try:
-        ad=(2 * close - high - low) / (high - low) * volume
-        Chaikin = pd.Series(ad.ewm(span=3, min_periods=3).mean() - ad.ewm(span=10, min_periods=10).mean(), name='Chaikin')
-        df = pd.DataFrame(Chaikin)
+        df=pd.DataFrame()
+        df['chaikin_ad_line']=talib.AD(high, low, close, volume)
+        df['chaikin_oscillator']=talib.ADOSC(high, low, close, volume, fastperiod=short_period, slowperiod=long_period)
         return df
     except Exception as e:
         raise(e)
@@ -798,8 +797,9 @@ def volume_adjusted_moving_average(close, volume, n):
         raise(e)
         
 #Sharpe Ratio
-def sharpe_ratio(close,trading_days=250):
+def sharpe_ratio(close):
     try:
+        trading_days=len(close)
         sqrt=np.sqrt(trading_days)
         avg_returns=np.mean(daily_returns(close))
         std_returns=np.std(daily_returns(close))
@@ -832,14 +832,12 @@ def vwap(high,low,close,volume):
         raise(e)
 
 #Sortino Ratio
-def sortino_ratio(close):
+def sortino_ratio(close,target_return):
     try:
-        rets=daily_returns(close)
-        semi_var = rets[rets < 0] ** 2
-        semi_var = semi_var.sum()/len(rets)
-        sqrt = np.sqrt(semi_var)
-        sortino=rets.mean()/sqrt
-        return sortino
+        ret=returns(close)
+        dr_data=downside_risk(close)
+        sr_data=(ret-target_return)/dr_data
+        return sr_data
     except Exception as e:
         raise(e)
 
@@ -871,14 +869,6 @@ def kurtosis(data):
     except Exception as e:
         raise(e)
 
-#Max Draw Down
-def max_drawdown(close):
-    try:
-        rets=daily_returns(close)
-        mdd=empyrical.max_drawdown(rets)
-        return mdd
-    except Exception as e:
-        raise(e)
 
 #Omega Ratio
 def omega_ratio(close, risk_free=0.0, required_return=0.0, trading_days=252):
@@ -925,18 +915,17 @@ def adjusted_returns(returns, adjustment_factor):
     return returns - adjustment_factor
 
 #Information Ratio
-def information_ratio(close,benchmark_close):
+def information_ratio(daily_returns, daily_benchmark_returns):
     try:
-        rets=daily_returns(close)
-        benchmark_rets=daily_returns(benchmark_close)
-        active_return = adjusted_returns(rets, benchmark_rets)
-        tracking_error = np.std(active_return, ddof=1)
-        if np.isnan(tracking_error):
-            return 0.0
-        if tracking_error == 0:
-            return np.nan
-        ir_data=np.mean(active_return) / tracking_error
-        return ir_data
+        if len(daily_returns)!=len(daily_benchmark_returns):
+            return 'Length of returns and benchmar_returns is not equal'
+        trading_days=len(daily_returns)
+        rets=daily_returns.mean()*trading_days
+        benchmark_rets=daily_benchmark_returns.mean()*trading_days
+        return_difference = rets - benchmark_rets
+        volatility = daily_returns.std() * np.sqrt(trading_days) 
+        information_ratio = return_difference / volatility
+        return information_ratio
     except Exception as e:
         raise(e)
 
@@ -978,8 +967,4 @@ def value_at_risk(close,tabular=True):
     except Exception as e:
         raise(e)
 
-#aapl_data=pd.DataFrame(OHLCV('AAPL','1998-01-01','1999-01-01')['history']['day'])
-#spy_data=pd.DataFrame(OHLCV('SPY','2018-01-01','2019-01-01')['history']['day'])
 
-
-#print(cagr(100000,136009,2))
