@@ -5,7 +5,6 @@ Sources:<br>
 <br>
 [Library two](http://mrjbq7.github.io/ta-lib/)
 <br>
-[Another Source](https://www.tradingview.com/chart/guFnnamT/)
 [MORE indicators](https://tulipindicators.org/list)
 https://github.com/laholmes/risk-adjusted-return
 
