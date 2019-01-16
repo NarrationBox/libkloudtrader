@@ -1,4 +1,4 @@
-from equities.data import *
+from libkloudtrader.equities.data import *
 import ta
 from datetime import datetime
 import pandas as pd
