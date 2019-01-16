@@ -1,13 +1,5 @@
 # Technical/Chart/Stock analysis functions for writing strategies, portfolio mgmt, risk mgmt
 
-Sources:<br>
-[Library one](https://technical-analysis-library-in-python.readthedocs.io/en/latest/index.html)
-<br>
-[Library two](http://mrjbq7.github.io/ta-lib/)
-<br>
-[MORE indicators](https://tulipindicators.org/list)
-https://github.com/laholmes/risk-adjusted-return
-
 | Analysis Functions|Status 
 | -------------     |:-------------:|
 | [Accumulation/Distribution Index](#accumulation-distribution-index)| ✅ 
