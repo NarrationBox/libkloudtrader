@@ -1,5 +1,6 @@
 # LibKloudTrader
 <a href="url"><img src="https://github.com/KloudTrader/libkloudtrader/raw/master/kloudtrader.png" align="left" height="150" width="150" >
+<br>
 
 KloudTrader's in-house trading framework optimized for computational finance and algortihmic trading. 📈📊📉 
 Connect your trading models and conquer the markets.
