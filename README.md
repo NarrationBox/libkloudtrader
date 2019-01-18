@@ -1,5 +1,5 @@
 # LibKloudTrader
-![KloudTrader](kloudtrader.png)
+<a href="url"><img src="https://github.com/KloudTrader/libkloudtrader/raw/master/kloudtrader.png" align="left" height="150" width="150" >
 
 KloudTrader's in-house trading framework optimized for computational finance and algortihmic trading. 📈📊📉 
 Connect your trading models and conquer the markets.
@@ -11,7 +11,7 @@ What does LibKLoudTrader offer?
 4. A Wide range of functions for financial, technical, portfolio and risk analsyis.
 5. Papertrading with virtual money upto $1 million. (Coming Soon)
 6. Multi Crypto-Currency Trading and Data APIs.  (Coming Soon)
-7. Managed deployment of your trading algorithm on [Narwhal]() without the hassle of dev-ops and tech support.
+7. Managed deployment of your trading algorithm on [Narwhal](https://kloudtrader.com/narwhal) without the hassle of dev-ops and tech support.
 
 Documentation for LibKloudTrader can be found here: https://docs.kloudtrader.com/
 
