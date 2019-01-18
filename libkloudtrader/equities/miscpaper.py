@@ -13,8 +13,8 @@ import json
 import requests 
 import os
 
-ACCESS_TOKEN=oc.environ["MISCPAPER_ACCESS_TOKEN"]
-ACCOUNT_NUMBER=oc.environ["MISCPAPER_ACCOUNT_NUMBER"]
+ACCESS_TOKEN=os.environ["MISCPAPER_ACCESS_TOKEN"]
+ACCOUNT_NUMBER=os.environ["MISCPAPER_ACCOUNT_NUMBER"]
 BROKERAGE_API_URL="https://sandbox.tradier.com"
 STREAMING_API_URL="https://stream.tradier.com"
 
