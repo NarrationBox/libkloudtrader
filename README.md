@@ -10,6 +10,7 @@
 <a href="https://www.linkedin.com/company/kloudtrader/"></a>![](https://img.shields.io/badge/Linkedin-follow-blue.svg)</a>
 ![](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-green.svg)
 <a href="https://join.slack.com/t/kloudtradercommunity/shared_invite/enQtNDc5MjI4ODI4OTc4LWFjYzg4ODliZWZiMGU1ZDY1MjBiNmZkMThkNDVmODg5NDM2YmViOTVhZTA0MjI3MDkzODRjZGU5ZmNhNWMwMzg">![](https://img.shields.io/badge/Chat-Slack-red.svg)</a>
+<a href="">![https://medium.com/@kloudtrader](https://img.shields.io/badge/Follow-medium-orange.svg)</a>
 
 KloudTrader's in-house trading framework optimized for computational finance and algortihmic trading. 📈📊📉
 
