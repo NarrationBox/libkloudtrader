@@ -3,7 +3,9 @@ import os
 import sys
 from datetime import datetime
 from time import sleep
+import pandas as pd
 import requests
+import io
 sys.path.append("..")
 from libkloudtrader.defaults import ACCESS_TOKEN, ACCOUNT_NUMBER
 
@@ -91,6 +93,74 @@ def volume(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
+def tick_data(symbol,start=None,end=None,data_filter='all',access_token=ACCESS_TOKEN):
+    params={
+        'symbol':str.upper(symbol),
+        'interval':'tick',
+        'start':start,
+        'end':end,
+        'session_filter':str(data_filter)
+    }
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales",headers=get_headers(access_token),params=params)
+    try:
+        return r.json()['series']['data']
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def min5_bar_data(symbol,start=None,end=None,data_filter='all',access_token=ACCESS_TOKEN):
+    params={
+        'symbol':str.upper(symbol),
+        'interval':'5min',
+        'start':start,
+        'end':end,
+        'session_filter':str(data_filter)
+    }
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales",headers=get_headers(access_token),params=params)
+    try:
+        return r.json()['series']['data']
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def min15_bar_data(symbol,start=None,end=None,data_filter='all',access_token=ACCESS_TOKEN):
+    params={
+         'symbol':str.upper(symbol),
+        'interval':'15min',
+        'start':start,
+        'end':end,
+        'session_filter':str(data_filter)
+    }
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales",headers=get_headers(access_token),params=params)
+    try:
+        return r.json()['series']['data']
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def list_of_companies(exchange='all'):
+    try:
+        nasdaq_request=requests.get('https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nasdaq&render=download')
+        nasdaq_companies=nasdaq_request.content
+        nasdaq_df=pd.read_csv(io.StringIO(nasdaq_companies.decode('utf-8')))
+        nyse_request=requests.get("https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download")
+        nyse_companies=nyse_request.content
+        nyse_df=pd.read_csv(io.StringIO(nyse_companies.decode('utf-8')))
+        amex_request=requests.get("https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=amex&render=download")
+        amex_companies=amex_request.content
+        amex_df=pd.read_csv(io.StringIO(amex_companies.decode('utf-8')))
+        if exchange=="all":
+            df = nyse_df.append(nasdaq_df, ignore_index=True)
+            df=df.append(amex_df, ignore_index=True)
+        elif exchange.upper()=='NYSE':
+            df = nyse_df
+        elif exchange.upper()=='NASDAQ':
+            df = nasdaq_df
+        elif exchange.upper()=="AMEX":
+            df = amex_df
+        else:
+            return 'Invalid Exchange!'
+        df=df.drop(columns=['Summary Quote','Unnamed: 8'])
+        return df
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%nyse_request.status_code)
 
 def intraday_status(access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/v1/markets/clock",headers=get_headers(access_token))
@@ -99,18 +169,6 @@ def intraday_status(access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-
-def time_and_sales(symbol,interval='tick',access_token=ACCESS_TOKEN):
-    
-
-    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales?symbol="+str(symbol),headers=get_headers(access_token),stream=True)
-    try:
-        return r.json()
-    except:
-        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-
-    
-#print(time_and_sales('AAPL','2018-10-24','2018-10-26'))
 
 def market_calendar(month,year):
     params = {

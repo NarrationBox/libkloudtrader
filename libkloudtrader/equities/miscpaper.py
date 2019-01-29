@@ -12,6 +12,7 @@ from time import sleep
 import json
 import requests 
 import os
+import pandas as pd
 
 ACCESS_TOKEN=os.environ["MISCPAPER_ACCESS_TOKEN"]
 ACCOUNT_NUMBER=os.environ["MISCPAPER_ACCOUNT_NUMBER"]
@@ -27,7 +28,7 @@ def get_headers(access_token):
 
 '''Trading'''
 #Equity
-def buy_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+def buy_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None,dataframe=False):
     post_params={
         'class':'equity',
         'symbol':str(symbol.upper()), 
@@ -42,14 +43,33 @@ def buy_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT
     }
     r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
     try:
+        if dataframe==False:
+            return r.json()
+        else:
+            return pd.DataFrame(r.json()['order'],index=[0])
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def buy_to_cover_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+    post_params={
+        'class':'equity',
+        'symbol':str(symbol.upper()), 
+        'duration':str(duration.lower()), 
+        'side':'buy_to_cover',
+        'quantity':str(quantity),
+        'type':str(order_type.lower()), 
+        'price':price,
+        'stop':stop,
+        'preview':'true'
+
+    }
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    try:
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-
-
-
-def sell_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+def sell_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None,dataframe=False):
     post_params={
         'class':'equity',
         'symbol':str(symbol.upper()), 
@@ -61,15 +81,36 @@ def sell_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUN
         'stop':None,
         'preview':'true'
     }
-    r=requests.post(SANDBOX_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    try:
+        if dataframe==False:
+            return r.json()
+        else:
+            return pd.DataFrame(r.json()['order'],index=[0])
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def sell_short_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+    post_params={
+        'class':'equity',
+        'symbol':str(symbol.upper()), 
+        'duration':str(duration.lower()), 
+        'side':'sell_short',
+        'quantity':str(quantity),
+        'type':str(order_type.lower()),
+        'price':None,
+        'stop':None,
+        'preview':'true'
+    }
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
     try:
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
+print(buy_to_cover_preview('WBAI',1))
 
-
-def buy(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+def buy(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None,dataframe=False):
     post_params={
         'class':'equity',
         'symbol':str(symbol.upper()), 
@@ -83,13 +124,16 @@ def buy(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,
     
     r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
     try:
-        return r.json()
+        if dataframe==False:
+            return r.json()
+        else:
+            return pd.DataFrame(r.json()['order'],index=[0])
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
         
 
 
-def sell(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+def sell(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None,dataframe=False):
     post_params={
         'class':'equity',
         'symbol':str(symbol.upper()), 
@@ -103,13 +147,15 @@ def sell(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER
     
     r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
     try:
-        return r.json()
+        if dataframe==False:
+            return r.json()
+        else:
+            return pd.DataFrame(r.json()['order'],index=[0])
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
        
 
-
-def change_equity_order(order_id,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+def change_equity_order(order_id,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None,dataframe=False):
     put_params={
         'order_id':order_id,
         'type':str(order_type.lower()), 
@@ -119,28 +165,38 @@ def change_equity_order(order_id,access_token=ACCESS_TOKEN,account_number=ACCOUN
     }
     r=requests.put(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/"+str(order_id),params=put_params,headers=get_headers(access_token))
     try:
-        return r.json()
+        if dataframe==False:
+            return r.json()
+        else:
+            return pd.DataFrame(r.json()['order'],index=[0])
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
 
 
-def cancel_equity_order(order_id,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER):
+def cancel_equity_order(order_id,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,dataframe=False):
     r=requests.delete(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/"+str(order_id),headers=get_headers(access_token))
     try:
-        return r.json()
+        if dataframe==False:
+            return r.json()
+        else:
+            return pd.DataFrame(r.json()['order'],index=[0])
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
 
 
-def user_profile(access_token=ACCESS_TOKEN):
+def user_profile(access_token=ACCESS_TOKEN,dataframe=False):
     r=requests.get(BROKERAGE_API_URL+"/v1/user/profile",headers=get_headers(access_token))
     try:
-        return r.json()
+        if dataframe==False:
+            return r.json()
+        else:
+            return pd.DataFrame(r.json()['profile']['account'])
     except: 
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code
         )
+
 
 def user_account_number(access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/v1/user/profile",headers=get_headers(access_token))
@@ -156,13 +212,13 @@ def user_account_number(access_token=ACCESS_TOKEN):
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code
         )
 
-
-def account_balance(access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER):
+def account_balance(access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,dataframe=False):
     r=requests.get(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/balances",headers=get_headers(access_token))
     try:
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
 
 def user_balance(access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/v1/user/balances",headers=get_headers(access_token))
@@ -276,6 +332,74 @@ def volume(symbol,start,end,interval='daily',access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
+def tick_data(symbol,start=None,end=None,data_filter='all',access_token=ACCESS_TOKEN):
+    params={
+        'symbol':str.upper(symbol),
+        'interval':'tick',
+        'start':start,
+        'end':end,
+        'session_filter':str(data_filter)
+    }
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales",headers=get_headers(access_token),params=params)
+    try:
+        return r.json()['series']['data']
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def min5_bar_data(symbol,start=None,end=None,data_filter='all',access_token=ACCESS_TOKEN):
+    params={
+        'symbol':str.upper(symbol),
+        'interval':'5min',
+        'start':start,
+        'end':end,
+        'session_filter':str(data_filter)
+    }
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales",headers=get_headers(access_token),params=params)
+    try:
+        return r.json()['series']['data']
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def min15_bar_data(symbol,start=None,end=None,data_filter='all',access_token=ACCESS_TOKEN):
+    params={
+         'symbol':str.upper(symbol),
+        'interval':'15min',
+        'start':start,
+        'end':end,
+        'session_filter':str(data_filter)
+    }
+    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales",headers=get_headers(access_token),params=params)
+    try:
+        return r.json()['series']['data']
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
+
+def list_of_companies(exchange='all'):
+    try:
+        nasdaq_request=requests.get('https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nasdaq&render=download')
+        nasdaq_companies=nasdaq_request.content
+        nasdaq_df=pd.read_csv(io.StringIO(nasdaq_companies.decode('utf-8')))
+        nyse_request=requests.get("https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download")
+        nyse_companies=nyse_request.content
+        nyse_df=pd.read_csv(io.StringIO(nyse_companies.decode('utf-8')))
+        amex_request=requests.get("https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=amex&render=download")
+        amex_companies=amex_request.content
+        amex_df=pd.read_csv(io.StringIO(amex_companies.decode('utf-8')))
+        if exchange=="all":
+            df = nyse_df.append(nasdaq_df, ignore_index=True)
+            df=df.append(amex_df, ignore_index=True)
+        elif exchange.upper()=='NYSE':
+            df = nyse_df
+        elif exchange.upper()=='NASDAQ':
+            df = nasdaq_df
+        elif exchange.upper()=="AMEX":
+            df = amex_df
+        else:
+            return 'Invalid Exchange!'
+        df=df.drop(columns=['Summary Quote','Unnamed: 8'])
+        return df
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%nyse_request.status_code)
 
 def intraday_status(access_token=ACCESS_TOKEN):
     r=requests.get(BROKERAGE_API_URL+"/v1/markets/clock",headers=get_headers(access_token))
@@ -284,18 +408,6 @@ def intraday_status(access_token=ACCESS_TOKEN):
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-
-def time_and_sales(symbol,interval='tick',access_token=ACCESS_TOKEN):
-    
-
-    r=requests.get(BROKERAGE_API_URL+"/v1/markets/timesales?symbol="+str(symbol),headers=get_headers(access_token),stream=True)
-    try:
-        return r.json()
-    except:
-        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-
-    
-#print(time_and_sales('AAPL','2018-10-24','2018-10-26'))
 
 def market_calendar(month,year):
     params = {

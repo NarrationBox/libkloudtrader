@@ -49,7 +49,24 @@ def buy_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
+def buy_to_cover_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+    post_params={
+        'class':'equity',
+        'symbol':str(symbol.upper()), 
+        'duration':str(duration.lower()), 
+        'side':'buy_to_cover',
+        'quantity':str(quantity),
+        'type':str(order_type.lower()), 
+        'price':price,
+        'stop':stop,
+        'preview':'true'
 
+    }
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    try:
+        return r.json()
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
 
 def sell_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
@@ -64,12 +81,29 @@ def sell_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUN
         'stop':None,
         'preview':'true'
     }
-    r=requests.post(SANDBOX_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
     try:
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
+def sell_short_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+    post_params={
+        'class':'equity',
+        'symbol':str(symbol.upper()), 
+        'duration':str(duration.lower()), 
+        'side':'sell_short',
+        'quantity':str(quantity),
+        'type':str(order_type.lower()),
+        'price':None,
+        'stop':None,
+        'preview':'true'
+    }
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    try:
+        return r.json()
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
 
 def buy(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
@@ -90,7 +124,23 @@ def buy(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
         
-
+def buy_to_cover(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+    post_params={
+        'class':'equity',
+        'symbol':str(symbol.upper()), 
+        'duration':str(duration.lower()), #time for which the order will be remain in effect (Day or GTC)
+        'side':'buy_to_cover',
+        'quantity':str(quantity),
+        'type':str(order_type.lower()), #market, limit, etc.
+        'price':str(price),
+        'stop':str(stop)
+    }
+    
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    try:
+        return r.json()
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
 def sell(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
     post_params={
@@ -110,7 +160,23 @@ def sell(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
        
-
+def sell_short(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
+    post_params={
+        'class':'equity',
+        'symbol':str(symbol.upper()), 
+        'duration':str(duration.lower()), #time for which the order will be remain in effect (Day or GTC)
+        'side':'sell_short',
+        'quantity':str(quantity),
+        'type':str(order_type.lower()), #market, limit, etc.
+        'price':str(price),
+        'stop':str(stop)
+    }
+    
+    r=requests.post(BROKERAGE_API_URL+"/v1/accounts/"+str(account_number)+"/orders/",params=post_params,headers=get_headers(access_token))
+    try:
+        return r.json()
+    except:
+        raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
 def change_equity_order(order_id,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None):
     put_params={
