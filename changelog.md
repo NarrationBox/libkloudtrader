@@ -1,6 +1,6 @@
 Changelog maintained from 29/01/2018
 <br>
-Current tagged version: 0.1
+Current tagged version:- 0.1
 
 | Date            | Version           | Changes/Additions/Fixes                 |
 |-----------------|-------------------|-----------------------------------------|
