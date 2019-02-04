@@ -12,6 +12,7 @@ from time import sleep
 import json
 import requests 
 import os
+import io
 import pandas as pd
 
 ACCESS_TOKEN=os.environ["MISCPAPER_ACCESS_TOKEN"]
@@ -107,7 +108,6 @@ def sell_short_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=
         return r.json()
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
-
 
 def buy(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None,dataframe=False):
     post_params={
