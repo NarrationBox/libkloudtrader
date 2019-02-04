@@ -108,7 +108,6 @@ def sell_short_preview(symbol,quantity,access_token=ACCESS_TOKEN,account_number=
     except:
         raise Exception("Did not receive any data. Status Code: %d"%r.status_code)
 
-print(buy_to_cover_preview('WBAI',1))
 
 def buy(symbol,quantity,access_token=ACCESS_TOKEN,account_number=ACCOUNT_NUMBER,duration="day",order_type="market",price=None,stop=None,dataframe=False):
     post_params={
