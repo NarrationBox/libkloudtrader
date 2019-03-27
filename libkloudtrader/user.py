@@ -2,7 +2,7 @@ from time import sleep
 import json
 import requests 
 import os
-from defaults import *
+from .defaults import *
 import pandas as pd
 
 BROKERAGE_API_URL="https://api.tradier.com"
