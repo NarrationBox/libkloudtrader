@@ -11,7 +11,7 @@ test:
 	pipenv run pytest -s -v
 
 git:
-	make format
+	pipenv run yapf -i --recursive libkloudtrader
 	git add -A
 	git commit -m "$(message)"
 	git push
@@ -24,3 +24,7 @@ typecheck:
 
 run:
 	pipenv run python algo.py
+
+make tox:
+	pipenv run tox
+

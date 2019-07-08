@@ -1,17 +1,18 @@
 """This module contains all functions related to options"""
 
 import requests
+import os
 import typing
 import datetime
 import pandas
-from exceptions import (
+from .exceptions import (
     InvalidBrokerage,
     InvalidStockExchange,
     BadRequest,
     InvalidCredentials,
 )
 """Data APIs start"""
-
+"""Config starts"""
 USER_ACCESS_TOKEN = os.environ['USER_ACCESS_TOKEN']
 USER_ACCOUNT_NUMBER = os.environ['USER_ACCOUNT_NUMBER']
 USER_BROKERAGE = os.environ['USER_BROKERAGE']
@@ -35,6 +36,9 @@ def tr_get_content_headers() -> dict:
         'Accept': 'application/json',
     }
     return headers
+
+
+"""Config ends"""
 
 
 def chains(symbol: str,

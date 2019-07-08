@@ -1,5 +1,6 @@
 """Trading and Data APIs for Crypto Currencies"""
 import requests
+import os
 from typing import Any
 import datetime
 import pandas
@@ -269,7 +270,7 @@ def user_balance(exchange: str = CRYPTO_EXCHANGE,
                  api_key: str = CRYPTO_API_KEY,
                  api_secret: str = CRYPTO_API_SECRET,
                  exchange_password: Any = CRYPTO_API_PASSWORD,
-                 exchange_password: Any = CRYPTO_API_UID,
+                 exchange_uid: Any = CRYPTO_API_UID,
                  test_mode: bool = False) -> Any:
     """Get your account balance"""
     try:
@@ -292,7 +293,7 @@ def user_ledger(currency_code: str,
                 api_key: str = CRYPTO_API_KEY,
                 api_secret: str = CRYPTO_API_SECRET,
                 exchange_password: Any = CRYPTO_API_PASSWORD,
-                exchange_password: Any = CRYPTO_API_UID,
+                exchange_uid: Any = CRYPTO_API_UID,
                 test_mode: bool = False) -> Any:
     """Get your ledger history"""
     try:
@@ -317,7 +318,7 @@ def user_trades(symbol: str,
                 api_key: str = CRYPTO_API_KEY,
                 api_secret: str = CRYPTO_API_SECRET,
                 exchange_password: Any = CRYPTO_API_PASSWORD,
-                exchange_password: Any = CRYPTO_API_UID,
+                exchange_uid: Any = CRYPTO_API_UID,
                 test_mode: bool = False):
     """Get your trades"""
     try:
@@ -342,7 +343,7 @@ def create_deposit_address(currency_code: str,
                            api_key: str = CRYPTO_API_KEY,
                            api_secret: str = CRYPTO_API_SECRET,
                            exchange_password: Any = CRYPTO_API_PASSWORD,
-                           exchange_password: Any = CRYPTO_API_UID,
+                           exchange_uid: Any = CRYPTO_API_UID,
                            test_mode: bool = False) -> Any:
     """Create A deposit address"""
     try:
@@ -367,7 +368,7 @@ def user_deposits(currency_code: str,
                   api_key: str = CRYPTO_API_KEY,
                   api_secret: str = CRYPTO_API_SECRET,
                   exchange_password: Any = CRYPTO_API_PASSWORD,
-                  exchange_password: Any = CRYPTO_API_UID,
+                  exchange_uid: Any = CRYPTO_API_UID,
                   test_mode: bool = False) -> Any:
     """Get your Deposits"""
     try:
@@ -392,7 +393,7 @@ def user_deposit_address(currency_code: str,
                          api_key: str = CRYPTO_API_KEY,
                          api_secret: str = CRYPTO_API_SECRET,
                          exchange_password: Any = CRYPTO_API_PASSWORD,
-                         exchange_password: Any = CRYPTO_API_UID,
+                         exchange_uid: Any = CRYPTO_API_UID,
                          test_mode: bool = False) -> Any:
     """Get your Deposit addresses"""
     try:
@@ -417,7 +418,7 @@ def user_withdrawls(currency_code: str,
                     api_key: str = CRYPTO_API_KEY,
                     api_secret: str = CRYPTO_API_SECRET,
                     exchange_password: Any = CRYPTO_API_PASSWORD,
-                    exchange_password: Any = CRYPTO_API_UID,
+                    exchange_uid: Any = CRYPTO_API_UID,
                     test_mode: bool = False) -> Any:
     """Get your withdrawls"""
     try:
@@ -442,7 +443,7 @@ def user_closed_orders(symbol: str,
                        api_key: str = CRYPTO_API_KEY,
                        api_secret: str = CRYPTO_API_SECRET,
                        exchange_password: Any = CRYPTO_API_PASSWORD,
-                       exchange_password: Any = CRYPTO_API_UID,
+                       exchange_uid: Any = CRYPTO_API_UID,
                        test_mode: bool = False) -> Any:
     """Get all of your closed orders"""
     try:
@@ -468,7 +469,7 @@ def get_order(order_id: str,
               api_key: str = CRYPTO_API_KEY,
               api_secret: str = CRYPTO_API_SECRET,
               exchange_password: Any = CRYPTO_API_PASSWORD,
-              exchange_password: Any = CRYPTO_API_UID,
+              exchange_uid: Any = CRYPTO_API_UID,
               test_mode: bool = False) -> Any:
     """Get information about a specific order"""
     try:
@@ -493,7 +494,7 @@ def get_orders(symbol: str,
                api_key: str = CRYPTO_API_KEY,
                api_secret: str = CRYPTO_API_SECRET,
                exchange_password: Any = CRYPTO_API_PASSWORD,
-               exchange_password: Any = CRYPTO_API_UID,
+               exchange_uid: Any = CRYPTO_API_UID,
                test_mode: bool = False) -> Any:
     """Get all of your orders"""
     try:
@@ -518,7 +519,7 @@ def user_transactions(currency_code: str,
                       api_key: str = CRYPTO_API_KEY,
                       api_secret: str = CRYPTO_API_SECRET,
                       exchange_password: Any = CRYPTO_API_PASSWORD,
-                      exchange_password: Any = CRYPTO_API_UID,
+                      exchange_uid: Any = CRYPTO_API_UID,
                       test_mode: bool = False) -> Any:
     """Get your transactions"""
     try:
@@ -542,7 +543,7 @@ def user_positions(exchange: str = CRYPTO_EXCHANGE,
                    api_key: str = CRYPTO_API_KEY,
                    api_secret: str = CRYPTO_API_SECRET,
                    exchange_password: Any = CRYPTO_API_PASSWORD,
-                   exchange_password: Any = CRYPTO_API_UID,
+                   exchange_uid: Any = CRYPTO_API_UID,
                    test_mode: bool = False) -> Any:
     """get your positions"""
     try:
@@ -572,7 +573,7 @@ def buy(symbol: str,
         api_key: str = CRYPTO_API_KEY,
         api_secret: str = CRYPTO_API_SECRET,
         exchange_password: Any = CRYPTO_API_PASSWORD,
-        exchange_password: Any = CRYPTO_API_UID,
+        exchange_uid: Any = CRYPTO_API_UID,
         test_mode: bool = False) -> Any:
     """Create a buy order"""
     try:
@@ -605,7 +606,7 @@ def sell(symbol: str,
          api_key: str = CRYPTO_API_KEY,
          api_secret: str = CRYPTO_API_SECRET,
          exchange_password: Any = CRYPTO_API_PASSWORD,
-         exchange_password: Any = CRYPTO_API_UID,
+         exchange_uid: Any = CRYPTO_API_UID,
          test_mode: bool = False) -> Any:
     """Create a sell order"""
     try:
@@ -635,7 +636,7 @@ def cancel_order(order_id: str,
                  api_key: str = CRYPTO_API_KEY,
                  api_secret: str = CRYPTO_API_SECRET,
                  exchange_password: Any = CRYPTO_API_PASSWORD,
-                 exchange_password: Any = CRYPTO_API_UID,
+                 exchange_uid: Any = CRYPTO_API_UID,
                  test_mode: bool = False) -> Any:
     """Cancel a specific order"""
     try:
@@ -653,15 +654,3 @@ def cancel_order(order_id: str,
         return data
     except Exception as exception:
         raise exception
-
-
-print(
-    user_positions(
-        exchange='kraken',
-        api_key="aL8dz5jNh81/XeB7A6SdPR+u5zrfPivDnRf8Q+7XDJPA+z1vJHxQtTc0",
-        api_secret=
-        "z9qFZiP3scpox9ptCSGgpPvicWkbf6oWoJWo76Q1VpKD0IEioVpeDVptOFjzf3VJMNdXlkVjZOIoDnezVUj5eQ==",
-        exchange_password="as",
-        exchange_uid="dada"))
-#print(user_transactions(currency_code="USD",exchange="bitmex",api_key="o8nCTQB6s_9qkNUXXRi4ZxIx",api_secret="wYMzSauluiWEGazcHoj2ZtVqp5W58yLHTI8sB8q23yEw5d0K",exchange_password="err_connection404!coinbasepro",exchange_uid="",test_mode=True))
-#print(user_positions(exchange="bitmex",api_key="o8nCTQB6s_9qkNUXXRi4ZxIx",api_secret="wYMzSauluiWEGazcHoj2ZtVqp5W58yLHTI8sB8q23yEw5d0K",exchange_password="err_connection404!coinbasepro",exchange_uid="",test_mode=True))
