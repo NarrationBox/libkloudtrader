@@ -1,6 +1,6 @@
-boto3==1.9.186
+boto3==1.9.183
 empyrical==0.5.0
-pyre-check==0.0.29
+pyre-check==0.0.27
 pytest==4.6.3
 pyti==0.2.2
 safety==1.8.5
@@ -10,7 +10,7 @@ TA-Lib==0.4.17
 tabulate==0.8.3
 tox==3.13.2
 pylint==2.3.1
-pyre-check==0.0.29
+pyre-check==0.0.27
 pytest==4.6.3
 pyti==0.2.2
 safety==1.8.5

@@ -14,7 +14,9 @@ from .exceptions import (
     BadRequest,
     InvalidCredentials,
 )
+from .config import *
 """Config starts"""
+
 USER_ACCESS_TOKEN = os.environ['USER_ACCESS_TOKEN']
 USER_ACCOUNT_NUMBER = os.environ['USER_ACCOUNT_NUMBER']
 USER_BROKERAGE = os.environ['USER_BROKERAGE']
@@ -841,7 +843,7 @@ def price_statistics(
 def buy_preview(
         symbol: str,
         quantity: int,
-        duration: str = "day",
+        duration: str = "gtc",
         order_type: str = "market",
         price: typing.Any = None,
         stop: typing.Any = None,
@@ -885,7 +887,7 @@ def buy_preview(
 def buy_to_cover_preview(
         symbol: str,
         quantity: int,
-        duration: str = "day",
+        duration: str = "gtc",
         order_type: str = "market",
         price: typing.Any = None,
         stop: typing.Any = None,
@@ -932,7 +934,7 @@ def sell_preview(symbol: str,
                  brokerage: typing.Any = USER_BROKERAGE,
                  access_token: str = USER_ACCESS_TOKEN,
                  account_number: str = USER_ACCOUNT_NUMBER,
-                 duration: str = "day",
+                 duration: str = "gtc",
                  order_type: str = "market",
                  price: typing.Any = None,
                  stop: typing.Any = None) -> dict:
@@ -973,7 +975,7 @@ def sell_short_preview(symbol: str,
                        brokerage: typing.Any = USER_BROKERAGE,
                        access_token: str = USER_ACCESS_TOKEN,
                        account_number: str = USER_ACCOUNT_NUMBER,
-                       duration: str = "day",
+                       duration: str = "gtc",
                        order_type: str = "market",
                        price: typing.Any = None,
                        stop: typing.Any = None) -> dict:
@@ -1013,7 +1015,7 @@ def sell_short_preview(symbol: str,
 def buy(
         symbol: str,
         quantity: int,
-        duration: str = "day",
+        duration: str = "gtc",
         order_type: str = "market",
         price: typing.Any = None,
         stop: typing.Any = None,
@@ -1056,7 +1058,7 @@ def buy(
 def buy_to_cover(
         symbol: str,
         quantity: int,
-        duration: str = "day",
+        duration: str = "gtc",
         order_type: str = "market",
         price: typing.Any = None,
         stop: typing.Any = None,
@@ -1101,7 +1103,7 @@ def sell(symbol: str,
          brokerage: typing.Any = USER_BROKERAGE,
          access_token: str = USER_ACCESS_TOKEN,
          account_number: str = USER_ACCOUNT_NUMBER,
-         duration: str = "day",
+         duration: str = "gtc",
          order_type: str = "market",
          price: typing.Any = None,
          stop: typing.Any = None) -> dict:
@@ -1141,7 +1143,7 @@ def sell_short(symbol: str,
                brokerage: typing.Any = USER_BROKERAGE,
                access_token: str = USER_ACCESS_TOKEN,
                account_number: str = USER_ACCOUNT_NUMBER,
-               duration: str = "day",
+               duration: str = "gtc",
                order_type: str = "market",
                price: typing.Any = None,
                stop: typing.Any = None) -> dict:
@@ -1164,10 +1166,10 @@ def sell_short(symbol: str,
         'price': price,
         'stop': stop,
     }
-    response = requests.post(
-        url + "{}/v1/accounts/{}/orders/".format(url, account_number),
-        params=post_params,
-        headers=tr_get_headers(access_token))
+    response = requests.post("{}/v1/accounts/{}/orders/".format(
+        url, account_number),
+                             params=post_params,
+                             headers=tr_get_headers(access_token))
     if response:
         return response.json()
     if response.status_code == 400:
@@ -1176,9 +1178,9 @@ def sell_short(symbol: str,
         raise InvalidCredentials(response.text)
 
 
-def change_order(order_id: int,
-                 duration: str = "day",
-                 order_type: str = "market",
+def change_order(order_id: str,
+                 duration: str,
+                 order_type: str,
                  price: typing.Any = None,
                  stop: typing.Any = None,
                  brokerage: typing.Any = USER_BROKERAGE,
@@ -1210,7 +1212,7 @@ def change_order(order_id: int,
         raise InvalidCredentials(response.text)
 
 
-def cancel_order(order_id: int,
+def cancel_order(order_id: str,
                  brokerage: typing.Any = USER_BROKERAGE,
                  access_token: str = USER_ACCESS_TOKEN,
                  account_number: str = USER_ACCOUNT_NUMBER) -> dict:
@@ -1379,11 +1381,10 @@ def account_orders(brokerage: str = USER_BROKERAGE,
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
-        print(response.text)
         raise InvalidCredentials(response.text)
 
 
-def get_order(order_id: int,
+def get_order(order_id: str,
               brokerage: str = USER_BROKERAGE,
               access_token: str = USER_ACCESS_TOKEN,
               account_number: str = USER_ACCOUNT_NUMBER) -> dict:
@@ -1406,3 +1407,10 @@ def get_order(order_id: int,
 
 
 '''User/Account APIs end'''
+print(
+    buy_to_cover_preview('AAPL',
+                         3,
+                         brokerage='miscpaper',
+                         access_token='eCqH0Jcd9XphAbgf7Snt5FkNzI53',
+                         account_number="VA10449694"))
+#print(latest_price_info('aapl'))
