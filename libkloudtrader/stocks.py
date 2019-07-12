@@ -1407,10 +1407,5 @@ def get_order(order_id: str,
 
 
 '''User/Account APIs end'''
-print(
-    buy_to_cover_preview('AAPL',
-                         3,
-                         brokerage='miscpaper',
-                         access_token='eCqH0Jcd9XphAbgf7Snt5FkNzI53',
-                         account_number="VA10449694"))
+
 #print(latest_price_info('aapl'))

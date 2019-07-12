@@ -45,7 +45,7 @@ def chains(symbol: str,
            expiration: str,
            brokerage: typing.Any = USER_BROKERAGE,
            access_token: str = USER_ACCESS_TOKEN,
-           pandas: bool = False) -> dict:
+           dataframe: bool = False) -> dict:
     """Get options chains"""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
@@ -58,24 +58,32 @@ def chains(symbol: str,
                             headers=tr_get_headers(access_token),
                             params=params)
     if response:
-        data = response.json()
-        for i in data['options']['option']:
-            i['trade_date'] = datetime.datetime.fromtimestamp(
-                float(i['trade_date']) / 1000.0).strftime("%Y-%m-%d %H:%M:%S")
-            i['bid_date'] = datetime.datetime.fromtimestamp(
-                float(i['bid_date']) / 1000.0).strftime("%Y-%m-%d %H:%M:%S")
-            i['ask_date'] = datetime.datetime.fromtimestamp(
-                float(i['ask_date']) / 1000.0).strftime("%Y-%m-%d %H:%M:%S")
-        if pandas == False:
-            return data
+        if response.json()['options'] != None:
+            data = response.json()
+            for i in data['options']['option']:
+                i['trade_date'] = datetime.datetime.fromtimestamp(
+                    float(i['trade_date']) /
+                    1000.0).strftime("%Y-%m-%d %H:%M:%S")
+                i['bid_date'] = datetime.datetime.fromtimestamp(
+                    float(i['bid_date']) /
+                    1000.0).strftime("%Y-%m-%d %H:%M:%S")
+                i['ask_date'] = datetime.datetime.fromtimestamp(
+                    float(i['ask_date']) /
+                    1000.0).strftime("%Y-%m-%d %H:%M:%S")
+            if dataframe == False:
+                return data['options']['option']
+            else:
+                return pandas.DataFrame(
+                    data['options']['option']).set_index('symbol')
         else:
-            return pandas.DataFrame(data)
+            return response.json()
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
         raise InvalidCredentials(response.text)
 
 
+#print(chains('AAPL','2019-08-16',dataframe=True))
 def expirations(symbol: str,
                 includeAllRoots: bool = True,
                 strikes: bool = True,
@@ -175,7 +183,7 @@ def buy_to_close(underlying_symbol: str,
                  option_symbol: str,
                  quantity: int,
                  order_type: str = "market",
-                 duration: str = "day",
+                 duration: str = "gtc",
                  price: typing.Any = None,
                  stop: typing.Any = None,
                  brokerage: typing.Any = USER_BROKERAGE,
@@ -292,3 +300,4 @@ def sell_to_close(underlying_symbol: str,
 
 
 """Trading APIs end"""
+print(buy_to_close('AAPL', 'AAPL190816P00090000', 1))
