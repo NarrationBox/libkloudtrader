@@ -1259,7 +1259,7 @@ def user_profile(brokerage: typing.Any = USER_BROKERAGE,
 
 def user_account_number(brokerage: typing.Any = USER_BROKERAGE,
                         access_token: str = USER_ACCESS_TOKEN) -> typing.Any:
-    '''Get your account number or list of account numbers associated with your user profile'''
+    '''Not in docs. Get your account number or list of account numbers associated with your user profile'''
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
@@ -1407,5 +1407,3 @@ def get_order(order_id: str,
 
 
 '''User/Account APIs end'''
-
-#print(latest_price_info('aapl'))

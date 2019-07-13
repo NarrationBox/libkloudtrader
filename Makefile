@@ -8,7 +8,7 @@ format:
 	pipenv run yapf -i --recursive libkloudtrader
 
 test:
-	pipenv run pytest -s -v tests/test_stocks.py
+	pipenv run pytest -s -v tests/test_options.py
 
 git:
 	pipenv run yapf -i --recursive libkloudtrader

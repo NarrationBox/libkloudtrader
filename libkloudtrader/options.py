@@ -41,7 +41,7 @@ def tr_get_content_headers() -> dict:
 """Config ends"""
 
 
-def chains(symbol: str,
+def chains(underlying_symbol: str,
            expiration: str,
            brokerage: typing.Any = USER_BROKERAGE,
            access_token: str = USER_ACCESS_TOKEN,
@@ -53,7 +53,10 @@ def chains(symbol: str,
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
         raise InvalidBrokerage
-    params = {'symbol': symbol.upper(), 'expiration': str(expiration)}
+    params = {
+        'symbol': underlying_symbol.upper(),
+        'expiration': str(expiration)
+    }
     response = requests.get("{}/v1/markets/options/chains".format(url),
                             headers=tr_get_headers(access_token),
                             params=params)
@@ -83,8 +86,7 @@ def chains(symbol: str,
         raise InvalidCredentials(response.text)
 
 
-#print(chains('AAPL','2019-08-16',dataframe=True))
-def expirations(symbol: str,
+def expirations(underlying_symbol: str,
                 includeAllRoots: bool = True,
                 strikes: bool = True,
                 brokerage: typing.Any = USER_BROKERAGE,
@@ -97,7 +99,7 @@ def expirations(symbol: str,
     else:
         raise InvalidBrokerage
     params = {
-        'symbol': symbol.upper(),
+        'symbol': underlying_symbol.upper(),
         'includeAllRoots': includeAllRoots,
         'strikes': strikes
     }
@@ -105,14 +107,17 @@ def expirations(symbol: str,
                             headers=tr_get_headers(access_token),
                             params=params)
     if response:
-        return response.json()
+        if response.json()['expirations'] != None:
+            return response.json()['expirations']['expiration']
+        else:
+            return response.json()
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
         raise InvalidCredentials(response.text)
 
 
-def strikes(symbol: str,
+def strikes(underlying_symbol: str,
             expiration: str,
             brokerage: typing.Any = USER_BROKERAGE,
             access_token: str = USER_ACCESS_TOKEN) -> dict:
@@ -123,7 +128,10 @@ def strikes(symbol: str,
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
         raise InvalidBrokerage
-    params = {'symbol': symbol.upper(), 'expiration': str(expiration)}
+    params = {
+        'symbol': underlying_symbol.upper(),
+        'expiration': str(expiration)
+    }
     response = requests.get("{}/v1/markets/options/strikes".format(url),
                             headers=tr_get_headers(access_token),
                             params=params)
@@ -137,6 +145,170 @@ def strikes(symbol: str,
 
 """Data APIs end"""
 """"Trading APIs begin"""
+
+
+def buy_to_open_preview(underlying_symbol: str,
+                        option_symbol: str,
+                        quantity: int,
+                        order_type: str = "market",
+                        duration: str = "gtc",
+                        price: typing.Any = None,
+                        stop: typing.Any = None,
+                        brokerage: typing.Any = USER_BROKERAGE,
+                        access_token: str = USER_ACCESS_TOKEN,
+                        account_number: str = USER_ACCOUNT_NUMBER) -> dict:
+    """Place buy to open Options order to trade a single option."""
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        raise InvalidBrokerage
+    params = {
+        'symbol': str(underlying_symbol.upper()),
+        'class': 'option',
+        'option_symbol': str(option_symbol.upper()),
+        'side': 'buy_to_open',
+        'quantity': quantity,
+        'type': order_type,
+        'duration': duration,
+        'price': price,
+        'stop': stop,
+        'preview': True
+    }
+    response = requests.post("{}/v1/accounts/{}/orders".format(
+        url, account_number),
+                             headers=tr_get_headers(access_token),
+                             params=params)
+    if response:
+        return response.json()
+    if response.status_code == 400:
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        raise InvalidCredentials(response.text)
+
+
+def buy_to_close_preview(underlying_symbol: str,
+                         option_symbol: str,
+                         quantity: int,
+                         order_type: str = "market",
+                         duration: str = "gtc",
+                         price: typing.Any = None,
+                         stop: typing.Any = None,
+                         brokerage: typing.Any = USER_BROKERAGE,
+                         access_token: str = USER_ACCESS_TOKEN,
+                         account_number: str = USER_ACCOUNT_NUMBER) -> dict:
+    """Place buy to close Options order to trade a single option."""
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        raise InvalidBrokerage
+    params = {
+        'symbol': underlying_symbol.upper(),
+        'class': 'option',
+        'option_symbol': option_symbol,
+        'side': 'buy_to_close',
+        'quantity': quantity,
+        'type': order_type,
+        'duration': duration,
+        'price': price,
+        'stop': stop,
+        'preview': True
+    }
+    response = requests.post("{}/v1/accounts/{}/orders".format(
+        url, account_number),
+                             headers=tr_get_headers(access_token),
+                             params=params)
+    if response:
+        return response.json()
+    if response.status_code == 400:
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        raise InvalidCredentials(response.text)
+
+
+def sell_to_open_preview(underlying_symbol: str,
+                         option_symbol: str,
+                         quantity: int,
+                         order_type: str = "market",
+                         duration: str = "gtc",
+                         price: typing.Any = None,
+                         stop: typing.Any = None,
+                         brokerage: typing.Any = USER_BROKERAGE,
+                         access_token: str = USER_ACCESS_TOKEN,
+                         account_number: str = USER_ACCOUNT_NUMBER) -> dict:
+    """Place buy to open Options order to trade a single option."""
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        raise InvalidBrokerage
+    params = {
+        'symbol': underlying_symbol.upper(),
+        'class': 'option',
+        'option_symbol': option_symbol,
+        'side': 'sell_to_open',
+        'quantity': quantity,
+        'type': order_type,
+        'duration': duration,
+        'price': price,
+        'stop': stop,
+        'preview': True
+    }
+    response = requests.post("{}/v1/accounts/{}/orders".format(
+        url, account_number),
+                             headers=tr_get_headers(access_token),
+                             params=params)
+    if response:
+        return response.json()
+    if response.status_code == 400:
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        raise InvalidCredentials(response.text)
+
+
+def sell_to_close_preview(underlying_symbol: str,
+                          option_symbol: str,
+                          quantity: int,
+                          order_type: str = "market",
+                          duration: str = "gtc",
+                          price: typing.Any = None,
+                          stop: typing.Any = None,
+                          brokerage: typing.Any = USER_BROKERAGE,
+                          access_token: str = USER_ACCESS_TOKEN,
+                          account_number: str = USER_ACCOUNT_NUMBER) -> dict:
+    """Place sell to close Options order to trade a single option."""
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        raise InvalidBrokerage
+    params = {
+        'symbol': underlying_symbol.upper(),
+        'class': 'option',
+        'option_symbol': option_symbol,
+        'side': 'sell_to_close',
+        'quantity': quantity,
+        'type': order_type,
+        'duration': duration,
+        'price': price,
+        'stop': stop,
+        'preview': True
+    }
+    response = requests.post("{}/v1/accounts/{}/orders".format(
+        url, account_number),
+                             headers=tr_get_headers(access_token),
+                             params=params)
+    if response:
+        return response.json()
+    if response.status_code == 400:
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        raise InvalidCredentials(response.text)
 
 
 def buy_to_open(underlying_symbol: str,
@@ -223,13 +395,13 @@ def sell_to_open(underlying_symbol: str,
                  option_symbol: str,
                  quantity: int,
                  order_type: str = "market",
-                 duration: str = "day",
+                 duration: str = "gtc",
                  price: typing.Any = None,
                  stop: typing.Any = None,
                  brokerage: typing.Any = USER_BROKERAGE,
                  access_token: str = USER_ACCESS_TOKEN,
                  account_number: str = USER_ACCOUNT_NUMBER) -> dict:
-    """Place buy to close Options order to trade a single option."""
+    """Place sell to open Options order to trade a single option."""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
@@ -263,13 +435,13 @@ def sell_to_close(underlying_symbol: str,
                   option_symbol: str,
                   quantity: int,
                   order_type: str = "market",
-                  duration: str = "day",
+                  duration: str = "gtc",
                   price: typing.Any = None,
                   stop: typing.Any = None,
                   brokerage: typing.Any = USER_BROKERAGE,
                   access_token: str = USER_ACCESS_TOKEN,
                   account_number: str = USER_ACCOUNT_NUMBER) -> dict:
-    """Place buy to close Options order to trade a single option."""
+    """Place sell to close Options order to trade a single option."""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
@@ -299,5 +471,60 @@ def sell_to_close(underlying_symbol: str,
         raise InvalidCredentials(response.text)
 
 
+def change_order(order_id: str,
+                 duration: str,
+                 order_type: str,
+                 price: typing.Any = None,
+                 stop: typing.Any = None,
+                 brokerage: typing.Any = USER_BROKERAGE,
+                 access_token: str = USER_ACCESS_TOKEN,
+                 account_number: str = USER_ACCOUNT_NUMBER) -> dict:
+    '''Change an order if it is not filled yet.'''
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        raise InvalidBrokerage
+    put_params = {
+        'order_id': order_id,
+        'type': str(order_type.lower()),
+        'duration': str(duration),
+        'price': str(price),
+        'stop': str(stop)
+    }
+    response = requests.put("{}/v1/accounts/{}/orders/{}".format(
+        url, account_number, order_id),
+                            data=put_params,
+                            headers=tr_get_headers(access_token))
+    if response:
+        return response.json()
+    if response.status_code == 400:
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        raise InvalidCredentials(response.text)
+
+
+def cancel_order(order_id: str,
+                 brokerage: typing.Any = USER_BROKERAGE,
+                 access_token: str = USER_ACCESS_TOKEN,
+                 account_number: str = USER_ACCOUNT_NUMBER) -> dict:
+    '''Cancel an order if it is not filled yet.'''
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        raise InvalidBrokerage
+    response = requests.delete("{}/v1/accounts/{}/orders/{}".format(
+        url, account_number, order_id),
+                               headers=tr_get_headers(access_token))
+    if response:
+        return response.json()
+    if response.status_code == 400:
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        raise InvalidCredentials(response.text)
+
+
 """Trading APIs end"""
-print(buy_to_close('AAPL', 'AAPL190816P00090000', 1))

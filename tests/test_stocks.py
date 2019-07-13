@@ -468,25 +468,52 @@ class TestCancelOrder:
     pass
 
 class TestUserProfile:
-    pass
+    def test_return_type(self):
+        '''test return type'''
+        data=stocks.user_profile()
+        assert isinstance(data,dict)
 
-class TestUserAccountNumber:
-    pass
+    def test_returned_data(self):
+        '''test returned data'''
+        data=stocks.user_profile()
+        assert 'account'in data['profile']
 
 class TestAccountBalance:
-    pass
+    def test_return_type(self):
+        '''test return type'''
+        data=stocks.account_balance()
+        assert isinstance(data,dict)
 
-class TestAccountPositions:
-    pass
+    def test_returned_data(self):
+        '''test returned data'''
+        data=stocks.account_balance()
+        assert 'option_short_value','equity' in data['balances']
 
 class TestAccountHistory:
-    pass
+    def test_return_type(self):
+        '''test return type'''
+        data=stocks.account_history()
+        assert isinstance(data,dict)
+
+    def test_returned_data(self):
+        '''test returned data'''
+        data=stocks.account_history()
+        assert 'event' in data['history']
+
+class TestAccountPositions:
+    def test_return_type(self):
+        '''test return type'''
+        data=stocks.account_positions()
+        assert isinstance(data,dict)
 
 class TestAccountClosedPositions:
-    pass
+    def test_return_type(self):
+        '''test return type'''
+        data=stocks.account_closed_positions()
+        assert isinstance(data,dict)
 
 class TestAccountOrders:
-    pass
-
-class TestGetOrder:
-    pass
+    def test_return_type(self):
+        '''test return type'''
+        data=stocks.account_orders()
+        assert isinstance(data,dict)

@@ -221,7 +221,7 @@ def order_book(symbol: str,
     bid = orderbook['bids'][0][0] if len (orderbook['bids']) > 0 else None
     ask = orderbook['asks'][0][0] if len (orderbook['asks']) > 0 else None
     spread = (ask - bid) if (bid and ask) else None
-    print ('market price', { 'bid': bid, 'ask': ask, 'spread': spread })
+    print('market price', { 'bid': bid, 'ask': ask, 'spread': spread })
     """
     try:
         url = CRYPTO_URL_LIVE
