@@ -102,7 +102,7 @@ def create_session(brokerage: typing.Any = USER_BROKERAGE,
     """Create a live session to receive sessionid which is needed for streaming live quotes and trades"""
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
-    if brokerage == "Tradier Inc.":
+    elif brokerage == "Tradier Inc.":
         pass
     else:
         raise InvalidBrokerage
