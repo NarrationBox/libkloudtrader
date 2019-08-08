@@ -16,3 +16,8 @@ class BadRequest(Exception):
 class InvalidCredentials(Exception):
     '''Exception for 401, Wrong Credentials'''
     pass
+
+
+class OverwriteError(Exception):
+    '''Exception raised when trying to add elements to DoubleEndedBuffer that has allow_overwrite=False and size==maxlen'''
+    pass

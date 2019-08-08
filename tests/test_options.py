@@ -41,14 +41,16 @@ class TestExpirations:
         assert data['expirations']==None
 
 class TestStrikes:
-    def test_return_type(seld):
+    def test_return_type(self):
         '''test return type'''
-        data=options.strikes(underlying_symbol="AAPL",expiration="2019-07-19")
+        expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
+        data=options.strikes(underlying_symbol="AAPL",expiration=expiration)
         assert isinstance(data,dict)
     
     def test_data(self):
         '''test returned data'''
-        data=options.strikes(underlying_symbol="AAPL",expiration="2019-07-19")
+        expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
+        data=options.strikes(underlying_symbol="AAPL",expiration=expiration)
         assert 'strike' in data['strikes']
 
 class TestBuyToOpen:

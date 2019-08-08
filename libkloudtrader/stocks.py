@@ -88,9 +88,9 @@ def latest_price_info(symbols: str,
             return data
         else:
             if isinstance(data, list):
-                return pandas.DataFrame(data).set_index('symbol')
+                return pandas.DataFrame(data)
             else:
-                return pandas.DataFrame([data]).set_index('symbol')
+                return pandas.DataFrame([data])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -122,8 +122,6 @@ def create_session(brokerage: typing.Any = USER_BROKERAGE,
 
 def latest_quote(
         symbols: str,
-        sessionid: str = create_session(brokerage=USER_BROKERAGE,
-                                        access_token=USER_ACCESS_TOKEN),
         brokerage: typing.Any = USER_BROKERAGE,
         access_token: str = USER_ACCESS_TOKEN,
 ) -> dict:
@@ -136,6 +134,8 @@ def latest_quote(
         pass
     else:
         raise InvalidBrokerage
+    sessionid: str = create_session(brokerage=USER_BROKERAGE,
+                                    access_token=USER_ACCESS_TOKEN)
     payload = {
         "sessionid": sessionid,
         "symbols": str(symbols.upper()),
@@ -172,8 +172,6 @@ def latest_quote(
 
 def latest_trade(
         symbols: str,
-        sessionid: str = create_session(brokerage=USER_BROKERAGE,
-                                        access_token=USER_ACCESS_TOKEN),
         filter: str = "trade",
         valid_only: bool = True,
         brokerage: typing.Any = USER_BROKERAGE,
@@ -188,6 +186,8 @@ def latest_trade(
         pass
     else:
         raise InvalidBrokerage
+    sessionid: str = create_session(brokerage=USER_BROKERAGE,
+                                    access_token=USER_ACCESS_TOKEN)
     payload = {
         "sessionid": sessionid,
         "symbols": str(symbols.upper()),
@@ -222,8 +222,6 @@ def latest_trade(
 
 def intraday_summary(
         symbols: str,
-        sessionid: str = create_session(brokerage=USER_BROKERAGE,
-                                        access_token=USER_ACCESS_TOKEN),
         filter: str = "summary",
         valid_only: bool = True,
         brokerage: typing.Any = USER_BROKERAGE,
@@ -238,6 +236,8 @@ def intraday_summary(
         pass
     else:
         raise InvalidBrokerage
+    sessionid: str = create_session(brokerage=USER_BROKERAGE,
+                                    access_token=USER_ACCESS_TOKEN)
     payload = {
         "sessionid": sessionid,
         "symbols": str(symbols.upper()),
@@ -297,7 +297,7 @@ def ohlcv(symbol: str,
             return response.json()
         else:
             data = response.json()['history']['day']
-            return pandas.DataFrame(data).set_index('date')
+            return pandas.DataFrame(data)
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -338,7 +338,7 @@ def tick_data(symbol: str,
                 return response.json()
             else:
                 return pandas.DataFrame(
-                    response.json()["series"]["data"]).set_index('time')
+                    response.json()["series"]["data"])
         if response.status_code == 400:
             raise BadRequest(response.text)
         if response.status_code == 401:
@@ -380,7 +380,7 @@ def min1_bar_data(symbol: str,
             return response.json()
         else:
             return pandas.DataFrame(
-                response.json()['series']['data']).set_index('time')
+                response.json()['series']['data'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -421,7 +421,7 @@ def min5_bar_data(
             return response.json()
         else:
             return pandas.DataFrame(
-                response.json()['series']['data']).set_index('time')
+                response.json()['series']['data'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -460,7 +460,7 @@ def min15_bar_data(symbol: str,
             return response.json()
         else:
             return pandas.DataFrame(
-                response.json()['series']['data']).set_index('time')
+                response.json()['series']['data'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -637,7 +637,7 @@ def shortable_securities(brokerage: typing.Any = USER_BROKERAGE,
             return response.json()
         else:
             return pandas.DataFrame(
-                response.json()['securities']['security']).set_index('symbol')
+                response.json()['securities']['security'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:

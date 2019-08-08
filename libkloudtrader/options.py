@@ -77,7 +77,7 @@ def chains(underlying_symbol: str,
                 return data['options']['option']
             else:
                 return pandas.DataFrame(
-                    data['options']['option']).set_index('symbol')
+                    data['options']['option'])
         else:
             return response.json()
     if response.status_code == 400:

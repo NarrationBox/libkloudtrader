@@ -178,7 +178,7 @@ def ohlcv(symbol: str,
                 columns = ['time', 'open', 'high', 'low', 'close', 'volume']
                 data = response.json()
                 return pandas.DataFrame(data,
-                                        columns=columns).set_index('time')
+                                        columns=columns)
             else:
                 return response.json()
         if response.status_code == 400:

@@ -4,12 +4,12 @@
 import boto3
 from botocore.exceptions import ClientError
 import os
-"""Config starts"""
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-AWS_DEFAULT_REGION = os.environ['AWS_DEFAULT_REGION']
-SNS_TOPIC_ARN = os.environ['SNS_TOPIC_ARN']
-"""Config ends"""
+
+#Config
+AWS_ACCESS_KEY_ID = os.environ['ALERT_ME_AAKI']
+AWS_SECRET_ACCESS_KEY = os.environ['ALERT_ME_ASAK']
+AWS_DEFAULT_REGION = os.environ['ALERT_ME_ADR']
+SNS_TOPIC_ARN = os.environ['ALERT_ME_STA']
 
 
 def sms(number: str, message: str) -> str:
