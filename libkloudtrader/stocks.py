@@ -103,7 +103,7 @@ def create_session(brokerage: typing.Any = USER_BROKERAGE,
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
     elif brokerage == "Tradier Inc.":
-        pass
+        access_token = access_token
     else:
         raise InvalidBrokerage
     response = requests.post(
@@ -130,14 +130,14 @@ def latest_quote(
     # https://docs.dxfeed.com/misc/dxFeed_TimeAndSale_Sale_Conditions.htm
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
-    if brokerage == "Tradier Inc.":
-        pass
+    elif brokerage == "Tradier Inc.":
+        access_token=access_token
     else:
         raise InvalidBrokerage
-    sessionid: str = create_session(brokerage=USER_BROKERAGE,
-                                    access_token=USER_ACCESS_TOKEN)
+   
     payload = {
-        "sessionid": sessionid,
+        "sessionid": create_session(brokerage=brokerage,
+        access_token=access_token),
         "symbols": str(symbols.upper()),
         "filter": 'quote',
         "linebreak": True,
@@ -182,7 +182,7 @@ def latest_trade(
     # https://docs.dxfeed.com/misc/dxFeed_TimeAndSale_Sale_Conditions.htm
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
-    if brokerage == "Tradier Inc.":
+    elif brokerage == "Tradier Inc.":
         pass
     else:
         raise InvalidBrokerage
@@ -232,7 +232,7 @@ def intraday_summary(
     # https://docs.dxfeed.com/misc/dxFeed_TimeAndSale_Sale_Conditions.htm
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
-    if brokerage == "Tradier Inc.":
+    elif brokerage == "Tradier Inc.":
         pass
     else:
         raise InvalidBrokerage
