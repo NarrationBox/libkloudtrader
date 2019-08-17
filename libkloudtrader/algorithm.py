@@ -1,3 +1,4 @@
+from typing import Any
 from streamz import Stream
 import numpy as np
 import libkloudtrader.stocks as stocks
@@ -8,8 +9,11 @@ source = Stream()
 
 def run(mode: str,
         strategy_name: str,
-        symbol_bucket=list,
-        states: list = ['open']):
+        symbol_bucket:list,
+        states: list = ['open'],
+        start_date: Any = None,
+        end_date: Any = None,
+        initial_cash: float = None):
     try:
         try:
             print("{} is now entering the live markets. All the Best!".format(
@@ -30,5 +34,6 @@ def run(mode: str,
                 source.map(strategy_name).sink(print)
                 for i in symbol_bucket:
                     source.emit(i)
+
     except Exception as exception:
         raise exception
