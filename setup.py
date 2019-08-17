@@ -22,5 +22,6 @@ setup(
         "tabulate",
         "ta",
         "TA-Lib",
+        "streamz"
     ],
 )
