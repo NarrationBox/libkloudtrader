@@ -131,13 +131,13 @@ def latest_quote(
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
     elif brokerage == "Tradier Inc.":
-        access_token=access_token
+        access_token = access_token
     else:
         raise InvalidBrokerage
-   
+
     payload = {
         "sessionid": create_session(brokerage=brokerage,
-        access_token=access_token),
+                                    access_token=access_token),
         "symbols": str(symbols.upper()),
         "filter": 'quote',
         "linebreak": True,
@@ -337,8 +337,7 @@ def tick_data(symbol: str,
             if not dataframe:
                 return response.json()
             else:
-                return pandas.DataFrame(
-                    response.json()["series"]["data"])
+                return pandas.DataFrame(response.json()["series"]["data"])
         if response.status_code == 400:
             raise BadRequest(response.text)
         if response.status_code == 401:
@@ -379,8 +378,7 @@ def min1_bar_data(symbol: str,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['series']['data'])
+            return pandas.DataFrame(response.json()['series']['data'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -420,8 +418,7 @@ def min5_bar_data(
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['series']['data'])
+            return pandas.DataFrame(response.json()['series']['data'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -459,8 +456,7 @@ def min15_bar_data(symbol: str,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['series']['data'])
+            return pandas.DataFrame(response.json()['series']['data'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -636,8 +632,7 @@ def shortable_securities(brokerage: typing.Any = USER_BROKERAGE,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['securities']['security'])
+            return pandas.DataFrame(response.json()['securities']['security'])
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:

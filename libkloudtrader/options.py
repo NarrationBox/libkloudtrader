@@ -76,8 +76,7 @@ def chains(underlying_symbol: str,
             if dataframe == False:
                 return data['options']['option']
             else:
-                return pandas.DataFrame(
-                    data['options']['option'])
+                return pandas.DataFrame(data['options']['option'])
         else:
             return response.json()
     if response.status_code == 400:
