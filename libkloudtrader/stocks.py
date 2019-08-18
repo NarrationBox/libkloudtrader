@@ -273,7 +273,7 @@ def ohlcv(symbol: str,
           interval: str = "daily",
           brokerage: typing.Any = USER_BROKERAGE,
           access_token: str = USER_ACCESS_TOKEN,
-          dataframe: bool = False) -> dict:
+          dataframe: bool = True) -> dict:
     """Get OHLCV(Open-High-Low-Close-Volume) data for a symbol (As back as you want to go)"""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
@@ -297,7 +297,10 @@ def ohlcv(symbol: str,
             return response.json()
         else:
             data = response.json()['history']['day']
-            return pandas.DataFrame(data)
+            dataframe = pandas.DataFrame(data)
+            dataframe['date'] = pandas.to_datetime(dataframe['date'])
+            dataframe.set_index(['date'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -310,7 +313,7 @@ def tick_data(symbol: str,
               data_filter: str = "open",
               brokerage: typing.Any = USER_BROKERAGE,
               access_token: str = USER_ACCESS_TOKEN,
-              dataframe: bool = False) -> dict:
+              dataframe: bool = True) -> dict:
     """Get historical tick data(trades placed) for a particular period of time. 
     Goes upto 5 days in the past."""
     if brokerage == "Tradier Inc.":
@@ -321,10 +324,9 @@ def tick_data(symbol: str,
         raise InvalidBrokerage
     params = {
         "symbol": str.upper(symbol),
-        "interval": "tick",
         "start": start,
         "end": end,
-        "session_filter": str(data_filter),
+        "session_filter": 'open',
     }
     response = requests.get(
         "{}/v1/markets/timesales".format(url),
@@ -337,13 +339,17 @@ def tick_data(symbol: str,
             if not dataframe:
                 return response.json()
             else:
-                return pandas.DataFrame(response.json()["series"]["data"])
+                data = response.json()["series"]["data"]
+                dataframe = pandas.DataFrame(data)
+                dataframe['time'] = pandas.to_datetime(dataframe['time'])
+                dataframe.set_index(['time'], inplace=True)
+                return dataframe
         if response.status_code == 400:
             raise BadRequest(response.text)
         if response.status_code == 401:
             raise InvalidCredentials(response.text)
     except Exception as exception:
-        raise (exception)
+        raise exception
 
 
 def min1_bar_data(symbol: str,
@@ -352,7 +358,7 @@ def min1_bar_data(symbol: str,
                   data_filter: str = "all",
                   brokerage: typing.Any = USER_BROKERAGE,
                   access_token: str = USER_ACCESS_TOKEN,
-                  dataframe: bool = False) -> dict:
+                  dataframe: bool = True) -> dict:
     """Get historical bar data with 1 minute interval for a given period of time. 
     Goes upto 20 days with data points during open market. Goes upto 10 days will all data points."""
     if brokerage == "Tradier Inc.":
@@ -378,7 +384,11 @@ def min1_bar_data(symbol: str,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(response.json()['series']['data'])
+            data = response.json()["series"]["data"]
+            dataframe = pandas.DataFrame(data)
+            dataframe['time'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['time'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -392,7 +402,7 @@ def min5_bar_data(
         data_filter: str = "all",
         brokerage: typing.Any = USER_BROKERAGE,
         access_token: str = USER_ACCESS_TOKEN,
-        dataframe: bool = False,
+        dataframe: bool = True,
 ) -> dict:
     """Get historical bar data with 5 minute interval for a given period of time. 
     Goes upto 40 days with data points duing open market. Goes upto 18 days will all data points."""
@@ -418,7 +428,11 @@ def min5_bar_data(
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(response.json()['series']['data'])
+            data = response.json()["series"]["data"]
+            dataframe = pandas.DataFrame(data)
+            dataframe['time'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['time'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -431,7 +445,7 @@ def min15_bar_data(symbol: str,
                    data_filter: str = "all",
                    brokerage: typing.Any = USER_BROKERAGE,
                    access_token: str = USER_ACCESS_TOKEN,
-                   dataframe: bool = False) -> dict:
+                   dataframe: bool = True) -> dict:
     """Get historical bar data with 15 minute interval for a given period of time. 
     Goes upto 40 days with data points duing open market. Goes upto 18 days will all data points."""
     if brokerage == "Tradier Inc.":
@@ -456,7 +470,11 @@ def min15_bar_data(symbol: str,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(response.json()['series']['data'])
+            data = response.json()["series"]["data"]
+            dataframe = pandas.DataFrame(data)
+            dataframe['time'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['time'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -616,7 +634,7 @@ def symbol_lookup(
 
 def shortable_securities(brokerage: typing.Any = USER_BROKERAGE,
                          access_token: str = USER_ACCESS_TOKEN,
-                         dataframe: bool = False) -> dict:
+                         dataframe: bool = True) -> dict:
     '''Get list of all securitites that can be sold short for the given broker'''
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
@@ -632,7 +650,9 @@ def shortable_securities(brokerage: typing.Any = USER_BROKERAGE,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(response.json()['securities']['security'])
+            data = response.json()['securities']['security']
+            dataframe = pandas.DataFrame(data)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -645,7 +665,7 @@ def check_if_shortable(symbol: str,
     '''Check if the given stock/security is shortable or not for the given broker'''
     try:
         data = shortable_securities(brokerage=brokerage,
-                                    access_token=access_token)
+                                    access_token=access_token,dataframe=False)
         if "security" in data['securities']:
             return bool(
                 next((item for item in data['securities']['security']

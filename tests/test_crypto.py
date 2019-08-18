@@ -65,14 +65,14 @@ class Test_quotes_for_all_symbols:
 class Test_ohlcv:
     def test_return_type(self):
         '''test return type'''
-        data=crypto.ohlcv(symbol='BTC/USD',start="2018-01-01",end="2018-04-01")
-        data2=crypto.ohlcv(symbol='BTC/USD',start="2019-01-01 17:30:00",end="2019-01-01 17:35:00",interval='1m')
+        data=crypto.ohlcv(symbol='BTC/USD',start="2018-01-01",end="2018-04-01",dataframe=False)
+        data2=crypto.ohlcv(symbol='BTC/USD',start="2019-01-01 17:30:00",end="2019-01-01 17:35:00",interval='1m',dataframe=False)
         assert isinstance(data,list) and isinstance(data2,list)
 
     def test_return_pandas_type(self):
         '''test pandas return type'''
-        data=crypto.ohlcv(symbol='BTC/USD',start="2018-01-01",end="2018-04-01",dataframe=True)
-        data2=crypto.ohlcv(symbol='BTC/USD',start="2019-01-01 17:30:00",end="2019-01-01 17:35:00",interval='1m',dataframe=True)
+        data=crypto.ohlcv(symbol='BTC/USD',start="2018-01-01",end="2018-04-01")
+        data2=crypto.ohlcv(symbol='BTC/USD',start="2019-01-01 17:30:00",end="2019-01-01 17:35:00",interval='1m')
         assert isinstance(data,pandas.DataFrame) and isinstance(data2,pandas.DataFrame)
 
     def test_invalid_interval(self):

@@ -152,7 +152,7 @@ def ohlcv(symbol: str,
           end: Any,
           interval: str = "1d",
           exchange: str = CRYPTO_EXCHANGE,
-          dataframe: bool = False) -> dict:
+          dataframe: bool = True) -> dict:
     """Get OHLCV/bar data. 
     Most exchanges don't go very back in time. 
     The very few that go need pagination which will be released soon. 
@@ -177,7 +177,10 @@ def ohlcv(symbol: str,
             if dataframe == True:
                 columns = ['time', 'open', 'high', 'low', 'close', 'volume']
                 data = response.json()
-                return pandas.DataFrame(data, columns=columns)
+                dataframe = pandas.DataFrame(data, columns=columns)
+                dataframe['time'] = pandas.to_datetime(dataframe['time'])
+                dataframe.set_index(['time'], inplace=True)
+                return dataframe
             else:
                 return response.json()
         if response.status_code == 400:

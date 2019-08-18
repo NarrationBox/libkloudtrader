@@ -67,17 +67,17 @@ class TestIntradaySummary:
 class TestOHLCV:
     def test_type(self):
         """Test return type"""
-        data = stocks.ohlcv('AAPl',start="2018-01-01",end="2019-01-01")
+        data = stocks.ohlcv('AAPl',start="2018-01-01",end="2019-01-01",dataframe=False)
         assert isinstance(data, dict)
     
     def test_pandas_type(self):
         """Test return Type"""
-        data=stocks.ohlcv('AAPl',start="2018-01-01",end="2019-01-01",dataframe=True)
+        data=stocks.ohlcv('AAPl',start="2018-01-01",end="2019-01-01")
         assert isinstance(data, pandas.DataFrame)
 
     def test_data(self):
         """Test data returned"""
-        data=stocks.ohlcv('AAPl',start="2018-01-01",end="2019-01-01")
+        data=stocks.ohlcv('AAPl',start="2018-01-01",end="2019-01-01",dataframe=False)
         assert 'day' in data['history']
 
     def test_wrong_date(self):
@@ -331,17 +331,17 @@ class TestSymbolLookup:
 class TestShortableSecurities:
     def test_return_type(self):
         """Test return type"""
-        data=stocks.shortable_securities()
+        data=stocks.shortable_securities(dataframe=False)
         assert isinstance(data,dict)
     
     def test_pandas_return_type(self):
         """Test datframe = True return type"""
-        data=stocks.shortable_securities(dataframe=True)
+        data=stocks.shortable_securities()
         assert isinstance(data,pandas.DataFrame)
 
     def test_data(self):
         """Test returned data"""
-        data=stocks.shortable_securities()
+        data=stocks.shortable_securities(dataframe=False)
         assert 'security' in data['securities']
 
 class TestCheckIfShortable:

@@ -2,19 +2,22 @@ import libkloudtrader.options as options
 import pandas
 
 class TestChains:
-    def test_return_type(seld):
+    def test_return_type(self):
         '''test return type'''
-        data=options.chains(underlying_symbol="AAPL",expiration="2019-08-16")
+        expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
+        data=options.chains(underlying_symbol="AAPL",expiration=expiration)
         assert isinstance(data,list)
     
-    def test_dataframe_return_type(seld):
+    def test_dataframe_return_type(self):
         '''test dataframe return type'''
-        data=options.chains(underlying_symbol="AAPL",expiration="2019-08-16",dataframe=True)
+        expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
+        data=options.chains(underlying_symbol="AAPL",expiration=expiration,dataframe=True)
         assert isinstance(data,pandas.DataFrame)
 
     def test_data(self):
         '''test returned data'''
-        data=options.chains(underlying_symbol="AAPL",expiration="2019-08-16")
+        expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
+        data=options.chains(underlying_symbol="AAPL",expiration=expiration)
         assert 'description','high'in data[0]
 
     def test_wrong_symbl(self):
