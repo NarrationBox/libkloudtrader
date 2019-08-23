@@ -32,4 +32,4 @@ def return_orderbook(symbol):
 
 
 
-algorithm.run(mode='live',strategy_name=return_orderbook,states=['premarket','open','postmarket','closed'],symbols=['AAPL'])
+algorithm.run(mode='live',strategy_name=return_orderbook,states=['premarket','open','postmarket','closed'],symbol_bucket=['AAPL'])

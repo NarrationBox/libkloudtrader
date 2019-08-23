@@ -4,6 +4,7 @@
 import datetime
 import io
 import json
+from enum import Enum
 import os
 import requests
 import typing
@@ -281,6 +282,16 @@ def ohlcv(symbol: str,
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
         raise InvalidBrokerage
+    
+    if interval=="1d":
+        interval="daily"
+    elif interval=="1w":
+        interval="weekly"
+    elif interval=="1M":
+        interval="monthly"
+    elif interval=="tick":
+        return tick_data(symbol,start,end,data_filter='open',brokerage=brokerage
+        ,access_token=access_token,dataframe=True)
     params: dict = {
         "symbol": str(symbol.upper()),
         "start": str(start),
@@ -665,7 +676,8 @@ def check_if_shortable(symbol: str,
     '''Check if the given stock/security is shortable or not for the given broker'''
     try:
         data = shortable_securities(brokerage=brokerage,
-                                    access_token=access_token,dataframe=False)
+                                    access_token=access_token,
+                                    dataframe=False)
         if "security" in data['securities']:
             return bool(
                 next((item for item in data['securities']['security']
@@ -1422,3 +1434,6 @@ def get_order(order_id: str,
 
 
 '''User/Account APIs end'''
+
+
+

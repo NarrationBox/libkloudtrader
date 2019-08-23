@@ -125,6 +125,7 @@ class Buffer(Sequence):
     def popleft(self):
         if len(self) == 0:
             raise IndexError()
+        res = self.arr[self.left_index]
         self.left_index += 1
         self.fix_indices()
         return res
@@ -136,15 +137,17 @@ import libkloudtrader.crypto as crypto
 
 
 def add_data_to_batch(batch_size, data):
-    buffer_50 = Buffer(size=batch_size, dtype='f8')
-    #bid=stocks.latest_quote(symbol)['bid']
-    while len(buffer_50) <= buffer_50.maxlen:
-        a = crypto.order_book('BTC/USD',
-                              number_of_data_points=batch_size)['bids']
-        for i in a:
-            #stream.sliding_window(5, return_partial=False).sink(print)
-            #return stream.emit(i[0])
-            buffer_50.append(i[0])
-        if len(buffer_50) == buffer_50.maxlen:
-            return np.array(buffer_50)
-            buffer_50.popleft()
+    batch = Buffer(size=batch_size, dtype='f8')
+    batch.append_left(data)
+    #print(batch)
+
+    if len(batch) == batch.maxlen:
+        yield batch
+        batch.pop()
+    #source.buffer(upstream=data,n=20)
+    '''while batch_size < batch.maxlen:
+        batch.append(data)
+        print(batch)
+        if batch.maxlen == batch_size:
+            return np.array(batch)'''
+        #batch = Buffer(size=batch_size, dtype='f8')

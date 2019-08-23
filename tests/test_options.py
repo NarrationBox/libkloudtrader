@@ -5,19 +5,19 @@ class TestChains:
     def test_return_type(self):
         '''test return type'''
         expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
-        data=options.chains(underlying_symbol="AAPL",expiration=expiration)
+        data=options.chains(underlying_symbol="AAPL",expiration=expiration,dataframe=False)
         assert isinstance(data,list)
     
     def test_dataframe_return_type(self):
         '''test dataframe return type'''
         expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
-        data=options.chains(underlying_symbol="AAPL",expiration=expiration,dataframe=True)
+        data=options.chains(underlying_symbol="AAPL",expiration=expiration)
         assert isinstance(data,pandas.DataFrame)
 
     def test_data(self):
         '''test returned data'''
         expiration=options.expirations(underlying_symbol='AAPL')[0]['date']
-        data=options.chains(underlying_symbol="AAPL",expiration=expiration)
+        data=options.chains(underlying_symbol="AAPL",expiration=expiration,dataframe=False)
         assert 'description','high'in data[0]
 
     def test_wrong_symbl(self):

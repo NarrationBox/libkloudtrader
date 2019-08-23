@@ -45,7 +45,7 @@ def chains(underlying_symbol: str,
            expiration: str,
            brokerage: typing.Any = USER_BROKERAGE,
            access_token: str = USER_ACCESS_TOKEN,
-           dataframe: bool = False) -> dict:
+           dataframe: bool = True) -> dict:
     """Get options chains"""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
@@ -76,7 +76,10 @@ def chains(underlying_symbol: str,
             if dataframe == False:
                 return data['options']['option']
             else:
-                return pandas.DataFrame(data['options']['option'])
+                data = pandas.DataFrame(data['options']['option'])
+                dataframe = pandas.DataFrame(data)
+                dataframe.set_index(['symbol'], inplace=True)
+                return dataframe
         else:
             return response.json()
     if response.status_code == 400:
