@@ -1,4 +1,6 @@
 from typing import Any
+import random
+import time
 from streamz import Stream
 import numpy as np
 import libkloudtrader.stocks as stocks
@@ -6,7 +8,7 @@ from .exceptions import InvalidAlgorithmMode, EmptySymbolBucket
 import pandas as pd
 from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
-import random
+
 
 source = Stream()
 
@@ -61,5 +63,6 @@ def live_trade(strategy_name: str,
                         data_batch) 
                     if len(batch)==batch_size:
                         batch.popleft()
+                    time.sleep(0.1)
     except Exception as exception:
         raise exception
