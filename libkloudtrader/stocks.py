@@ -4,11 +4,13 @@
 import datetime
 import io
 import json
+import random
 from enum import Enum
 import os
 import requests
 import typing
 import pandas
+import numpy
 from .exceptions import (
     InvalidBrokerage,
     InvalidStockExchange,
@@ -139,7 +141,7 @@ def latest_quote(
     payload = {
         "sessionid": create_session(brokerage=brokerage,
                                     access_token=access_token),
-        "symbols": str(symbols.upper()),
+        "symbols": symbols,
         "filter": 'quote',
         "linebreak": True,
     }
@@ -191,7 +193,7 @@ def latest_trade(
                                     access_token=USER_ACCESS_TOKEN)
     payload = {
         "sessionid": sessionid,
-        "symbols": str(symbols.upper()),
+        "symbols": symbols,
         "filter": filter,
         "linebreak": True,
         "validOnly": valid_only,
@@ -241,7 +243,7 @@ def intraday_summary(
                                     access_token=USER_ACCESS_TOKEN)
     payload = {
         "sessionid": sessionid,
-        "symbols": str(symbols.upper()),
+        "symbols": symbols,
         "filter": filter,
         "linebreak": True,
         "validOnly": valid_only,
@@ -282,16 +284,21 @@ def ohlcv(symbol: str,
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
         raise InvalidBrokerage
-    
-    if interval=="1d":
-        interval="daily"
-    elif interval=="1w":
-        interval="weekly"
-    elif interval=="1M":
-        interval="monthly"
-    elif interval=="tick":
-        return tick_data(symbol,start,end,data_filter='open',brokerage=brokerage
-        ,access_token=access_token,dataframe=True)
+
+    if interval == "1d":
+        interval = "daily"
+    elif interval == "1w":
+        interval = "weekly"
+    elif interval == "1M":
+        interval = "monthly"
+    elif interval == "tick":
+        return tick_data(symbol,
+                         start,
+                         end,
+                         data_filter='open',
+                         brokerage=brokerage,
+                         access_token=access_token,
+                         dataframe=True)
     params: dict = {
         "symbol": str(symbol.upper()),
         "start": str(start),
@@ -1434,6 +1441,22 @@ def get_order(order_id: str,
 
 
 '''User/Account APIs end'''
+'''Functions not in documentation'''
 
+
+def incoming_tick_data_handler(symbol: str, fake_feed: bool = False):
+    latest_tick_entry=latest_price_info(symbol,dataframe=False)
+    to_be_converted_to_float = numpy.array([
+        'last', 'change', 'volume', 'open', 'high', 'low', 'close', 'bid',
+        'ask', 'change_percentage', 'average_volume', 'last_volume',
+        'prevclose', 'week_52_high', 'week_52_low', 'bidsize', 'asksize'
+    ])
+    for convertable in to_be_converted_to_float:
+        latest_tick_entry[convertable]=float(latest_tick_entry[convertable])
+        if fake_feed==True:
+            make_fake_price=numpy.array(['ask','last','bid'])
+            for i in make_fake_price:
+                latest_tick_entry[i]=latest_tick_entry[i]+random.uniform(-1,1)
+    return latest_tick_entry
 
 

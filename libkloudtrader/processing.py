@@ -150,4 +150,4 @@ def add_data_to_batch(batch_size, data):
         print(batch)
         if batch.maxlen == batch_size:
             return np.array(batch)'''
-        #batch = Buffer(size=batch_size, dtype='f8')
+    #batch = Buffer(size=batch_size, dtype='f8')
