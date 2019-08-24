@@ -43,7 +43,7 @@ def live_trade(strategy_name: str,
                data: str = None,
                batch_size=500):
     try:
-        logging.info("{} is now entering the live markets. All the Best 👍🏼".format(
+        logging.info("{} is now entering the live markets. All the Best. 👍🏼".format(
             strategy_name.__name__))
         if isinstance(symbol_bucket, list):
             symbol_bucket = np.array(symbol_bucket)
@@ -61,5 +61,6 @@ def live_trade(strategy_name: str,
                         batch.popleft()
                     time.sleep(1)
     except Exception as exception:
-        logging.exception(exception)
+        logging.debug('Oops! Something went wrong while Narwhal was taking your algorithm to live markets. ⚠️')
+        logging.error(exception)
         break
