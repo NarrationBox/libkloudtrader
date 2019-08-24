@@ -1,6 +1,7 @@
 from typing import Any
 import random
 import time
+import logging
 import numpy as np
 import libkloudtrader.stocks as stocks
 from .exceptions import InvalidAlgorithmMode, EmptySymbolBucket
@@ -42,7 +43,7 @@ def live_trade(strategy_name: str,
                data: str = None,
                batch_size=500):
     try:
-        print("{} is now entering the live markets. All the Best 👍🏼".format(
+        logging.info("{} is now entering the live markets. All the Best 👍🏼".format(
             strategy_name.__name__))
         if isinstance(symbol_bucket, list):
             symbol_bucket = np.array(symbol_bucket)
@@ -60,4 +61,5 @@ def live_trade(strategy_name: str,
                         batch.popleft()
                     time.sleep(1)
     except Exception as exception:
-        raise exception
+        logging.exception(exception)
+        break
