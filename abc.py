@@ -1,6 +1,6 @@
 import pandas as pd
-from streamz import Stream
 import random
+from streamz import Stream
 from streamz.dataframe import DataFrame
 stream = Stream()
 while True:
