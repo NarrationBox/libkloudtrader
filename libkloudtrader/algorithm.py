@@ -10,9 +10,8 @@ from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
 
 logger = logging.getLogger('narwhal')
-logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(asctime)s %(module)s %(levelname)s: %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
+                        datefmt='%m/%d/%Y %I:%M:%S %p',level=logging.INFO)
 
 
 def backtest(symbol: str,
