@@ -1,16 +1,16 @@
-'''Various methods to help you store, process, pipeline and manipulate your streams of data'''
+'''Various methods to help store, process, pipeline and manipulate your streams of data'''
 
 from typing import Any
 from collections.abc import Sequence
 import numpy as np
-from .exceptions import OverwriteError
-import libkloudtrader.stocks as stocks
 import pandas as pd
+import libkloudtrader.stocks as stocks
+from .exceptions import OverwriteError
+
 
 
 class Buffer(Sequence):
     '''A doubled sided/ended queue/buffer for internal data stream processing'''
-
     def __init__(self,
                  size: int,
                  dtype: Any = np.float32,
@@ -129,25 +129,3 @@ class Buffer(Sequence):
         self.left_index += 1
         self.fix_indices()
         return res
-
-
-from streamz import Stream
-stream = Stream()
-import libkloudtrader.crypto as crypto
-
-
-def add_data_to_batch(batch_size, data):
-    batch = Buffer(size=batch_size, dtype='f8')
-    batch.append_left(data)
-    #print(batch)
-
-    if len(batch) == batch.maxlen:
-        yield batch
-        batch.pop()
-    #source.buffer(upstream=data,n=20)
-    '''while batch_size < batch.maxlen:
-        batch.append(data)
-        print(batch)
-        if batch.maxlen == batch_size:
-            return np.array(batch)'''
-    #batch = Buffer(size=batch_size, dtype='f8')

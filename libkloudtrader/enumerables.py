@@ -1,7 +1,13 @@
 from enum import Enum
-import libkloudtrader.stocks as stocks
 from functools import partial
+import libkloudtrader.stocks as stocks
+import libkloudtrader.crypto as crypto
+import libkloudtrader.options as options
 
 
 class Data_Types(Enum):
-    US_stocks_daily = partial(stocks.ohlcv)
+    '''Data Types of backtesting and live trading'''
+    US_STOCKS_daily = partial(stocks.ohlcv)
+    US_STOCKS_live_feed = partial(stocks.incoming_tick_data_handler)
+    CRYPTO_live_feed=partial(crypto.incoming_tick_data_handler)
+    CRYPTO_live_feed_level2=partial(crypto.incoming_tick_data_handler_level2)

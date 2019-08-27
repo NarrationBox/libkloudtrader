@@ -215,7 +215,7 @@ def trades(symbol: str,
 
 
 def order_book(symbol: str,
-               number_of_data_points: int = 0,
+               number_of_data_points: int = 1,
                exchange: str = CRYPTO_EXCHANGE):
     """Get L2/L3 orderbook for a particular market trading symbol."""
     """Example:
@@ -244,7 +244,7 @@ def order_book(symbol: str,
 
 
 def L2_order_book(symbol: str,
-                  number_of_data_points: int = 0,
+                  number_of_data_points: int = 1,
                   exchange: str = CRYPTO_EXCHANGE):
     """Level 2 (price-aggregated) order book for a particular symbol."""
     try:
@@ -732,3 +732,37 @@ def cancel_order(order_id: str,
             raise InvalidCredentials(response.text)
     except Exception as exception:
         raise exception
+
+
+'''Functions not in documentation'''
+def incoming_tick_data_handler(symbol: str, number_of_data_points:int=1,fake_feed:bool=False):
+    latest_orderbook_entry=order_book(symbol,number_of_data_points=1)
+    latest_trades=trades(symbol, number_of_data_points=1)
+    latest_orderbook_entry_dict={}
+    latest_orderbook_entry_dict['symbol']=symbol
+    latest_orderbook_entry_dict['ask'] = latest_orderbook_entry['asks'][0][0] if len (latest_orderbook_entry['asks']) > 0 else None
+    latest_orderbook_entry_dict['asksize'] = latest_orderbook_entry['asks'][0][1] if len (latest_orderbook_entry['asks']) > 0 else None
+    latest_orderbook_entry_dict['bid'] = latest_orderbook_entry['bids'][0][0] if len (latest_orderbook_entry['bids']) > 0 else None
+    latest_orderbook_entry_dict['bidsize'] = latest_orderbook_entry['bids'][0][1] if len (latest_orderbook_entry['bids']) > 0 else None
+    latest_orderbook_entry_dict['quotedate']=latest_orderbook_entry['datetime']
+    latest_orderbook_entry_dict['nonce']=latest_orderbook_entry['nonce']
+    latest_orderbook_entry_dict['price']=latest_trades[0]['price']
+    latest_orderbook_entry_dict['tradesize']=latest_trades[0]['amount']
+    latest_orderbook_entry_dict['tradedate']=latest_trades[0]['datetime']
+    return latest_orderbook_entry_dict
+
+def incoming_tick_data_handler_level2(symbol: str, number_of_data_points:int=1,fake_feed:bool=False):
+    latest_orderbook_entry=L2_order_book(symbol,number_of_data_points=1)
+    latest_trades=trades(symbol, number_of_data_points=1)
+    latest_orderbook_entry_dict={}
+    latest_orderbook_entry_dict['symbol']=symbol
+    latest_orderbook_entry_dict['ask'] = latest_orderbook_entry['asks'][0][0] if len (latest_orderbook_entry['asks']) > 0 else None
+    latest_orderbook_entry_dict['asksize'] = latest_orderbook_entry['asks'][0][1] if len (latest_orderbook_entry['asks']) > 0 else None
+    latest_orderbook_entry_dict['bid'] = latest_orderbook_entry['bids'][0][0] if len (latest_orderbook_entry['bids']) > 0 else None
+    latest_orderbook_entry_dict['bidsize'] = latest_orderbook_entry['bids'][0][1] if len (latest_orderbook_entry['bids']) > 0 else None
+    latest_orderbook_entry_dict['quotedate']=latest_orderbook_entry['datetime']
+    latest_orderbook_entry_dict['nonce']=latest_orderbook_entry['nonce']
+    latest_orderbook_entry_dict['price']=latest_trades[0]['price']
+    latest_orderbook_entry_dict['tradesize']=latest_trades[0]['amount']
+    latest_orderbook_entry_dict['tradedate']=latest_trades[0]['datetime']
+    return latest_orderbook_entry_dict

@@ -31,3 +31,7 @@ class InvalidAlgorithmMode(Exception):
 class EmptySymbolBucket(Exception):
     '''Excption raised if symbol bucket is empty'''
     pass
+
+class InvalidDataFeedType(Exception):
+    '''Exception raised if user asks for invalid data feed'''
+    pass
