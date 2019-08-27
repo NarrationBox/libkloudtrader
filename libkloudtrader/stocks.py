@@ -1446,30 +1446,27 @@ def get_order(order_id: str,
 
 def incoming_tick_data_handler(symbol: str, fake_feed: bool = False):
     try:
-        latest_quote_tick=latest_quote(symbol)
-        latest_trade_tick=latest_trade(symbol)
-        latest_quote_tick['bidsize']=latest_quote_tick['bidsz']
+        latest_quote_tick = latest_quote(symbol)
+        latest_trade_tick = latest_trade(symbol)
+        latest_quote_tick['bidsize'] = latest_quote_tick['bidsz']
         del latest_quote_tick['bidsz']
-        latest_quote_tick['asksize']=latest_quote_tick['asksz']
+        latest_quote_tick['asksize'] = latest_quote_tick['asksz']
         del latest_quote_tick['asksz']
         for i in latest_trade_tick:
-            latest_quote_tick['tradeexch']=latest_trade_tick['exch']
-            latest_quote_tick['price']=latest_trade_tick['last']
-            latest_quote_tick['tradesize']=latest_trade_tick['size']
-            latest_quote_tick['cvol']=latest_trade_tick['cvol']
-            latest_quote_tick['tradedate']=latest_trade_tick['date']
-        to_be_converted_to_float = numpy.array([
-            'price', 'ask', 'bid', 'tradesize','cvol'
-        ])
+            latest_quote_tick['tradeexch'] = latest_trade_tick['exch']
+            latest_quote_tick['price'] = latest_trade_tick['last']
+            latest_quote_tick['tradesize'] = latest_trade_tick['size']
+            latest_quote_tick['cvol'] = latest_trade_tick['cvol']
+            latest_quote_tick['tradedate'] = latest_trade_tick['date']
+        to_be_converted_to_float = numpy.array(
+            ['price', 'ask', 'bid', 'tradesize', 'cvol'])
         for i in to_be_converted_to_float:
-            latest_quote_tick[i]=float(latest_quote_tick[i])
-        if fake_feed==True:
-            make_fake_price=numpy.array(['ask','price','bid'])
-            random_number=random.uniform(-2,2)
+            latest_quote_tick[i] = float(latest_quote_tick[i])
+        if fake_feed == True:
+            make_fake_price = numpy.array(['ask', 'price', 'bid'])
+            random_number = random.uniform(-2, 2)
             for i in make_fake_price:
-                latest_quote_tick[i]=latest_quote_tick[i]+random_number
+                latest_quote_tick[i] = latest_quote_tick[i] + random_number
         return latest_quote_tick
     except Exception as exception:
         raise exception
-
-

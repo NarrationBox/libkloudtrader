@@ -9,5 +9,5 @@ class Data_Types(Enum):
     '''Data Types of backtesting and live trading'''
     US_STOCKS_daily = partial(stocks.ohlcv)
     US_STOCKS_live_feed = partial(stocks.incoming_tick_data_handler)
-    CRYPTO_live_feed=partial(crypto.incoming_tick_data_handler)
-    CRYPTO_live_feed_level2=partial(crypto.incoming_tick_data_handler_level2)
+    CRYPTO_live_feed = partial(crypto.incoming_tick_data_handler)
+    CRYPTO_live_feed_level2 = partial(crypto.incoming_tick_data_handler_level2)

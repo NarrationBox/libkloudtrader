@@ -1,18 +1,15 @@
 from typing import Any
 import random
 import time
-import logging
 import numpy as np
 import pandas as pd
 import libkloudtrader.stocks as stocks
-from .exceptions import InvalidAlgorithmMode, EmptySymbolBucket, InvalidDataFeedType
+from libkloudtrader.exceptions import InvalidAlgorithmMode, EmptySymbolBucket, InvalidDataFeedType
 from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
+from libkloudtrader.logs import init_logger
 
-logger = logging.getLogger('narwhal')
-logging.basicConfig(format='%(asctime)s %(module)s %(levelname)s: %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p',level=logging.INFO)
-
+logger = init_logger(__name__)
 
 def backtest(symbol: str,
              strategy: str,
@@ -44,37 +41,43 @@ def backtest(symbol: str,
 
 def live_trade(strategy_name: str,
                symbol_bucket: list,
-               data_feed_type:str,
+               data_feed_type: str,
                states: list = ['open'],
-               batch_size:int=1000,feed_delay:float=0.0,fake_feed:bool=False):
+               batch_size: int = 1000,
+               feed_delay: float = 0.0,
+               fake_feed: bool = False):
     try:
-        logging.info("{} is now entering the live markets. All the Best. 👍🏼".format(
+        logger.info("{} is now entering the live markets. 📈\n".format(
             strategy_name.__name__))
         if isinstance(symbol_bucket, list):
             symbol_bucket = np.array(symbol_bucket)
         elif type(symbol_bucket) not in (numpy.ndarray, list):
             raise TypeError('Symbol bucket must be a list or numpy array')
-        if data_feed_type not in ('CRYPTO_live_feed','US_STOCKS_live_feed','CRYPTO_live_feed_level2'):
-            raise InvalidDataFeedType('This Data Feed is not available for live trading. Please use libkloudtrader.algorithm.backtest() for backtesting or using hisotrical data.')
-        if data_feed_type in ("CRYPTO_live_feed",'CRYPTO_live_feed_level2'):
-            feed_delay=2
-        data_feed=Data_Types[data_feed_type].value
+        if data_feed_type not in ('CRYPTO_live_feed', 'US_STOCKS_live_feed',
+                                  'CRYPTO_live_feed_level2'):
+            raise InvalidDataFeedType(
+                'This Data Feed is not available for live trading. Please use libkloudtrader.algorithm.backtest() for backtesting or using hisotrical data.'
+            )
+        if data_feed_type in ("CRYPTO_live_feed", 'CRYPTO_live_feed_level2'):
+            feed_delay = 2
+        data_feed = Data_Types[data_feed_type].value
         while stocks.intraday_status()['state'] in states:
             batch = processing.Buffer(batch_size, dtype=object)
             while len(batch) < batch_size:
                 for symbol in symbol_bucket:
-                    batch.append(data_feed(symbol,fake_feed=fake_feed))
+                    batch.append(data_feed(symbol, fake_feed=fake_feed))
                     data_batch = pd.DataFrame(batch)
-                    locals()['strategy_name'](
-                        data_batch) 
-                    if len(batch)==batch_size:
+                    locals()['strategy_name'](data_batch)
+                    if len(batch) == batch_size:
                         batch.popleft()
                     time.sleep(feed_delay)
     except (KeyboardInterrupt, SystemExit):
         print('\n')
-        logging.critical('User stopped the algorithm')
+        logger.critical('User stopped the algorithm')
     except Exception as exception:
-        logging.error('Oops! Something went wrong while Narwhal was taking your algorithm to live markets. ⚠️')
-        raise exception
+        logger.critical('Exiting {}...'.format(strategy_name.__name__))
+        logger.warning(
+            'Oops! Something went wrong while your algorithm was being deployed to live markets. ⚠️'
+        )
+        logger.error(exception)
         exit()
-

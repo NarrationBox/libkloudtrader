@@ -8,9 +8,9 @@ import libkloudtrader.stocks as stocks
 from .exceptions import OverwriteError
 
 
-
 class Buffer(Sequence):
     '''A doubled sided/ended queue/buffer for internal data stream processing'''
+
     def __init__(self,
                  size: int,
                  dtype: Any = np.float32,

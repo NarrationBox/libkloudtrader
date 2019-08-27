@@ -12,7 +12,6 @@ setup(
     long_description_content_type="text/markdown",
     long_description='pypi.md',
     install_requires=[
-        "requests",
         "boto3",
         "pandas",
         "numpy",
@@ -22,6 +21,6 @@ setup(
         "tabulate",
         "ta",
         "TA-Lib",
-        "streamz"
+        "coloredlogs"
     ],
 )
