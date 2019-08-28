@@ -4,10 +4,13 @@
 import datetime
 import io
 import json
+import random
+from enum import Enum
 import os
 import requests
 import typing
 import pandas
+import numpy
 from .exceptions import (
     InvalidBrokerage,
     InvalidStockExchange,
@@ -131,14 +134,14 @@ def latest_quote(
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
     elif brokerage == "Tradier Inc.":
-        access_token=access_token
+        access_token = access_token
     else:
         raise InvalidBrokerage
-   
+
     payload = {
         "sessionid": create_session(brokerage=brokerage,
-        access_token=access_token),
-        "symbols": str(symbols.upper()),
+                                    access_token=access_token),
+        "symbols": symbols,
         "filter": 'quote',
         "linebreak": True,
     }
@@ -190,7 +193,7 @@ def latest_trade(
                                     access_token=USER_ACCESS_TOKEN)
     payload = {
         "sessionid": sessionid,
-        "symbols": str(symbols.upper()),
+        "symbols": symbols,
         "filter": filter,
         "linebreak": True,
         "validOnly": valid_only,
@@ -240,7 +243,7 @@ def intraday_summary(
                                     access_token=USER_ACCESS_TOKEN)
     payload = {
         "sessionid": sessionid,
-        "symbols": str(symbols.upper()),
+        "symbols": symbols,
         "filter": filter,
         "linebreak": True,
         "validOnly": valid_only,
@@ -273,7 +276,7 @@ def ohlcv(symbol: str,
           interval: str = "daily",
           brokerage: typing.Any = USER_BROKERAGE,
           access_token: str = USER_ACCESS_TOKEN,
-          dataframe: bool = False) -> dict:
+          dataframe: bool = True) -> dict:
     """Get OHLCV(Open-High-Low-Close-Volume) data for a symbol (As back as you want to go)"""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
@@ -281,6 +284,21 @@ def ohlcv(symbol: str,
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
         raise InvalidBrokerage
+
+    if interval == "1d":
+        interval = "daily"
+    elif interval == "1w":
+        interval = "weekly"
+    elif interval == "1M":
+        interval = "monthly"
+    elif interval == "tick":
+        return tick_data(symbol,
+                         start,
+                         end,
+                         data_filter='open',
+                         brokerage=brokerage,
+                         access_token=access_token,
+                         dataframe=True)
     params: dict = {
         "symbol": str(symbol.upper()),
         "start": str(start),
@@ -297,7 +315,10 @@ def ohlcv(symbol: str,
             return response.json()
         else:
             data = response.json()['history']['day']
-            return pandas.DataFrame(data)
+            dataframe = pandas.DataFrame(data)
+            dataframe['date'] = pandas.to_datetime(dataframe['date'])
+            dataframe.set_index(['date'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -310,7 +331,7 @@ def tick_data(symbol: str,
               data_filter: str = "open",
               brokerage: typing.Any = USER_BROKERAGE,
               access_token: str = USER_ACCESS_TOKEN,
-              dataframe: bool = False) -> dict:
+              dataframe: bool = True) -> dict:
     """Get historical tick data(trades placed) for a particular period of time. 
     Goes upto 5 days in the past."""
     if brokerage == "Tradier Inc.":
@@ -321,10 +342,9 @@ def tick_data(symbol: str,
         raise InvalidBrokerage
     params = {
         "symbol": str.upper(symbol),
-        "interval": "tick",
         "start": start,
         "end": end,
-        "session_filter": str(data_filter),
+        "session_filter": 'open',
     }
     response = requests.get(
         "{}/v1/markets/timesales".format(url),
@@ -337,14 +357,17 @@ def tick_data(symbol: str,
             if not dataframe:
                 return response.json()
             else:
-                return pandas.DataFrame(
-                    response.json()["series"]["data"])
+                data = response.json()["series"]["data"]
+                dataframe = pandas.DataFrame(data)
+                dataframe['time'] = pandas.to_datetime(dataframe['time'])
+                dataframe.set_index(['time'], inplace=True)
+                return dataframe
         if response.status_code == 400:
             raise BadRequest(response.text)
         if response.status_code == 401:
             raise InvalidCredentials(response.text)
     except Exception as exception:
-        raise (exception)
+        raise exception
 
 
 def min1_bar_data(symbol: str,
@@ -353,7 +376,7 @@ def min1_bar_data(symbol: str,
                   data_filter: str = "all",
                   brokerage: typing.Any = USER_BROKERAGE,
                   access_token: str = USER_ACCESS_TOKEN,
-                  dataframe: bool = False) -> dict:
+                  dataframe: bool = True) -> dict:
     """Get historical bar data with 1 minute interval for a given period of time. 
     Goes upto 20 days with data points during open market. Goes upto 10 days will all data points."""
     if brokerage == "Tradier Inc.":
@@ -379,8 +402,11 @@ def min1_bar_data(symbol: str,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['series']['data'])
+            data = response.json()["series"]["data"]
+            dataframe = pandas.DataFrame(data)
+            dataframe['time'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['time'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -394,7 +420,7 @@ def min5_bar_data(
         data_filter: str = "all",
         brokerage: typing.Any = USER_BROKERAGE,
         access_token: str = USER_ACCESS_TOKEN,
-        dataframe: bool = False,
+        dataframe: bool = True,
 ) -> dict:
     """Get historical bar data with 5 minute interval for a given period of time. 
     Goes upto 40 days with data points duing open market. Goes upto 18 days will all data points."""
@@ -420,8 +446,11 @@ def min5_bar_data(
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['series']['data'])
+            data = response.json()["series"]["data"]
+            dataframe = pandas.DataFrame(data)
+            dataframe['time'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['time'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -434,7 +463,7 @@ def min15_bar_data(symbol: str,
                    data_filter: str = "all",
                    brokerage: typing.Any = USER_BROKERAGE,
                    access_token: str = USER_ACCESS_TOKEN,
-                   dataframe: bool = False) -> dict:
+                   dataframe: bool = True) -> dict:
     """Get historical bar data with 15 minute interval for a given period of time. 
     Goes upto 40 days with data points duing open market. Goes upto 18 days will all data points."""
     if brokerage == "Tradier Inc.":
@@ -459,8 +488,11 @@ def min15_bar_data(symbol: str,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['series']['data'])
+            data = response.json()["series"]["data"]
+            dataframe = pandas.DataFrame(data)
+            dataframe['time'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['time'], inplace=True)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -620,7 +652,7 @@ def symbol_lookup(
 
 def shortable_securities(brokerage: typing.Any = USER_BROKERAGE,
                          access_token: str = USER_ACCESS_TOKEN,
-                         dataframe: bool = False) -> dict:
+                         dataframe: bool = True) -> dict:
     '''Get list of all securitites that can be sold short for the given broker'''
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
@@ -636,8 +668,9 @@ def shortable_securities(brokerage: typing.Any = USER_BROKERAGE,
         if not dataframe:
             return response.json()
         else:
-            return pandas.DataFrame(
-                response.json()['securities']['security'])
+            data = response.json()['securities']['security']
+            dataframe = pandas.DataFrame(data)
+            return dataframe
     if response.status_code == 400:
         raise BadRequest(response.text)
     if response.status_code == 401:
@@ -650,7 +683,8 @@ def check_if_shortable(symbol: str,
     '''Check if the given stock/security is shortable or not for the given broker'''
     try:
         data = shortable_securities(brokerage=brokerage,
-                                    access_token=access_token)
+                                    access_token=access_token,
+                                    dataframe=False)
         if "security" in data['securities']:
             return bool(
                 next((item for item in data['securities']['security']
@@ -1407,3 +1441,32 @@ def get_order(order_id: str,
 
 
 '''User/Account APIs end'''
+'''Functions not in documentation'''
+
+
+def incoming_tick_data_handler(symbol: str, fake_feed: bool = False):
+    try:
+        latest_quote_tick = latest_quote(symbol)
+        latest_trade_tick = latest_trade(symbol)
+        latest_quote_tick['bidsize'] = latest_quote_tick['bidsz']
+        del latest_quote_tick['bidsz']
+        latest_quote_tick['asksize'] = latest_quote_tick['asksz']
+        del latest_quote_tick['asksz']
+        for i in latest_trade_tick:
+            latest_quote_tick['tradeexch'] = latest_trade_tick['exch']
+            latest_quote_tick['price'] = latest_trade_tick['last']
+            latest_quote_tick['tradesize'] = latest_trade_tick['size']
+            latest_quote_tick['cvol'] = latest_trade_tick['cvol']
+            latest_quote_tick['tradedate'] = latest_trade_tick['date']
+        to_be_converted_to_float = numpy.array(
+            ['price', 'ask', 'bid', 'tradesize', 'cvol'])
+        for i in to_be_converted_to_float:
+            latest_quote_tick[i] = float(latest_quote_tick[i])
+        if fake_feed == True:
+            make_fake_price = numpy.array(['ask', 'price', 'bid'])
+            random_number = random.uniform(-2, 2)
+            for i in make_fake_price:
+                latest_quote_tick[i] = latest_quote_tick[i] + random_number
+        return latest_quote_tick
+    except Exception as exception:
+        raise exception

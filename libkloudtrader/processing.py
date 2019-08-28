@@ -1,11 +1,11 @@
-'''Various methods to help you store, process, pipeline and manipulate your streams of data'''
+'''Various methods to help store, process, pipeline and manipulate your streams of data'''
 
 from typing import Any
 from collections.abc import Sequence
 import numpy as np
-from .exceptions import OverwriteError
-import libkloudtrader.stocks as stocks
 import pandas as pd
+import libkloudtrader.stocks as stocks
+from .exceptions import OverwriteError
 
 
 class Buffer(Sequence):
@@ -114,40 +114,18 @@ class Buffer(Sequence):
         self.fix_indices()
         self.arr[self.left_index] = value
 
-
     def pop(self):
-        if len(self)==0:
+        if len(self) == 0:
             raise IndexError()
-        self.right_index-=1 
+        self.right_index -= 1
         self.fix_indices()
         res = self.arr[self.right_index % self.size]
         return res
 
     def popleft(self):
-        if len(self)==0:
+        if len(self) == 0:
             raise IndexError()
-        self.left_index+=1 
+        res = self.arr[self.left_index]
+        self.left_index += 1
         self.fix_indices()
         return res
-
-from streamz import Stream
-stream = Stream()
-import libkloudtrader.crypto as crypto
-def add_data_to_batch(batch_size, data):
-    buffer_50 = Buffer(size=batch_size, dtype='f8')
-    #bid=stocks.latest_quote(symbol)['bid']
-    while len(buffer_50)<=buffer_50.maxlen:
-        a=crypto.order_book('BTC/USD',number_of_data_points=batch_size)['bids']
-        for i in a:
-            #stream.sliding_window(5, return_partial=False).sink(print)
-            #return stream.emit(i[0])
-            buffer_50.append(i[0])
-        if len(buffer_50)==buffer_50.maxlen:
-            return np.array(buffer_50)
-            buffer_50.popleft()
-           
-        
-
-
-
-
