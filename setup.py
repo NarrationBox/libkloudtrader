@@ -20,7 +20,6 @@ setup(
         "empyrical",
         "tabulate",
         "ta",
-        "TA-Lib",
-        "coloredlogs"
+        "TA-Lib"
     ],
 )

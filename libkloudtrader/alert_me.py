@@ -1,9 +1,11 @@
 '''Module for SMS and Email alert functions'''
 #pylint: disable = line-too-long, too-many-lines, no-name-in-module, import-error, multiple-imports, pointless-string-statement, wrong-import-order
-
+import os
 import boto3
 from botocore.exceptions import ClientError
-import os
+from libkloudtrader.logs import start_logger
+
+logger = start_logger(__name__)
 
 #Config
 AWS_ACCESS_KEY_ID = os.environ['ALERT_ME_AAKI']
@@ -22,7 +24,8 @@ def sms(number: str, message: str) -> str:
         topicarn = SNS_TOPIC_ARN
         client.subscribe(TopicArn=topicarn, Protocol='sms', Endpoint=number)
         client.publish(Message=message, TopicArn=topicarn)
-        return 'Alert created'
+        logger.sucess("Alert Created for {}".format(number))
+        return True
     except Exception as exception:
         raise exception
 
@@ -54,7 +57,8 @@ def email(email_id: str,
             },
             Source=sender,
         )
-        return 'Alert created'
+        logger.sucess("Alert Created for {}".format(email_id))
+        return True
     except ClientError as exception:
         raise exception.response['Error']['Message']
 
@@ -64,6 +68,8 @@ def sms_and_email(number: str, email_id: str, message: str) -> str:
     try:
         sms(number, message)
         email(email_id, message)
-        return 'Alert created'
+        logger.sucess("Alert Created for {} and {}".format(number,email_id))
+        return True
     except Exception as exception:
         raise exception
+

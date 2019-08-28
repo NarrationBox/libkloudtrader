@@ -467,6 +467,7 @@ class TestChangeOrder:
 class TestCancelOrder:
     pass
 
+
 class TestUserProfile:
     def test_return_type(self):
         '''test return type'''
