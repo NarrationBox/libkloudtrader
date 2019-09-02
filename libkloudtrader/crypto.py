@@ -178,8 +178,8 @@ def ohlcv(symbol: str,
                 columns = ['time', 'open', 'high', 'low', 'close', 'volume']
                 data = response.json()
                 dataframe = pandas.DataFrame(data, columns=columns)
-                dataframe['time'] = pandas.to_datetime(dataframe['time'])
-                dataframe.set_index(['time'], inplace=True)
+                dataframe['date'] = pandas.to_datetime(dataframe['time'])
+                dataframe.set_index(['date'], inplace=True)
                 return dataframe
             else:
                 return response.json()

@@ -24,7 +24,7 @@ def sms(number: str, message: str) -> str:
         topicarn = SNS_TOPIC_ARN
         client.subscribe(TopicArn=topicarn, Protocol='sms', Endpoint=number)
         client.publish(Message=message, TopicArn=topicarn)
-        logger.sucess("Alert Created for {}".format(number))
+        logger.info("Alert Created for {}".format(number))
         return True
     except Exception as exception:
         raise exception
@@ -57,7 +57,7 @@ def email(email_id: str,
             },
             Source=sender,
         )
-        logger.sucess("Alert Created for {}".format(email_id))
+        logger.info("Alert Created for {}".format(email_id))
         return True
     except ClientError as exception:
         raise exception.response['Error']['Message']
@@ -68,8 +68,10 @@ def sms_and_email(number: str, email_id: str, message: str) -> str:
     try:
         sms(number, message)
         email(email_id, message)
-        logger.sucess("Alert Created for {} and {}".format(number,email_id))
+
         return True
     except Exception as exception:
         raise exception
 
+
+sms_and_email('+919871766213', 'chetanalwaysmalhotra@gmail.com', 'Hello there')

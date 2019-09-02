@@ -557,7 +557,8 @@ def list_of_companies(exchange: str = "all"):
             dataframe = amex_dataframe
         else:
             raise InvalidStockExchange
-        dataframe = dataframe.drop(columns=["Summary Quote", "Unnamed: 8"])
+        del dataframe["Summary Quote"]
+        del dataframe["Unnamed: 8"]
         return dataframe
     except Exception as exception:
         raise exception

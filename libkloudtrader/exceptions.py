@@ -36,3 +36,8 @@ class EmptySymbolBucket(Exception):
 class InvalidDataFeedType(Exception):
     '''Exception raised if user asks for invalid data feed'''
     pass
+
+
+class AnalysisException(Exception):
+    """Exception raised if something goes wrong in libkloudtrader.analysis"""
+    pass

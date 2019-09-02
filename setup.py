@@ -15,11 +15,7 @@ setup(
         "boto3",
         "pandas",
         "numpy",
-        "pyti",
-        "scipy",
         "empyrical",
-        "tabulate",
-        "ta",
         "TA-Lib"
     ],
 )

@@ -160,7 +160,7 @@ class Test_user_closed_orders:
         '''test returned data'''
         data=crypto.user_closed_orders('BTC/USD',test_mode=True)
         assert 'id','info' in data[0]
-
+"""
 class Test_get_order:
     def test_return_type(self):
         '''test return type'''
@@ -171,7 +171,7 @@ class Test_get_order:
         '''test returned data'''
         data=crypto.get_order(order_id="55d7e42e-3a6c-41f7-a692-9bdcd23dce70",symbol='BTC/USD',test_mode=True)
         assert 'id','info' in data
-
+"""
 class Test_user_orders:
     def test_return_type(self):
         '''test return type'''

@@ -10,15 +10,7 @@ import libkloudtrader.processing as processing
 from libkloudtrader.logs import start_logger
 
 logger = start_logger(__name__)
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
 
 def backtest(symbol: str,
              strategy: str,
@@ -27,7 +19,8 @@ def backtest(symbol: str,
              end_date: Any = None,
              data_interval: str = '1d',
              initial_capital: float = None,
-             comission: float = 0):
+             comission: float = 0,
+             preferred_benchmark: str):
 
     data_to_backtest = Data_Types[data].value
     print(
@@ -82,9 +75,10 @@ def live_trade(strategy_name: str,
                     time.sleep(feed_delay)
     except (KeyboardInterrupt, SystemExit):
         print('\n')
-        logger.critical('User stopped the algorithm')
+        logger.critical("User's keyboard prompt stopped {}".format(
+            strategy_name.__name__))
     except Exception as exception:
-        logger.critical('Exiting {}...'.format(strategy_name.__name__))
+        logger.critical('Exiting {}...‼️'.format(strategy_name.__name__))
         logger.warning(
             'Oops! Something went wrong while your algorithm was being deployed to live markets. ⚠️'
         )
