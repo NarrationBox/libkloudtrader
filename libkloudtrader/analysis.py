@@ -142,7 +142,7 @@ def relative_strength_index(data, period):
             'Calculating Relative Strength Index for peirod = {}'.format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         diff = data.diff(1)
         which_dn = diff < 0
         up, dn = diff, diff * 0
@@ -215,7 +215,7 @@ def absolute_price_oscillator(data, short_period, long_period, matype=0):
             .format(short_period, long_period))
         for period in (short_period, long_period):
             check_period_type(period)
-            check_for_period_error(data, period)
+            
         apo_data = talib.APO(data, short_period, long_period, matype=matype)
         return apo_data
     except Exception as exception:
@@ -341,7 +341,7 @@ def bollinger_bands(data, period=20, nbdevup=2, nbdevdn=2, matype=0):
         logger.info(
             'Calculating Bollinger Bands for period = {}'.format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         upperband, middleband, lowerband = talib.BBANDS(data,
                                                         timeperiod=period,
                                                         nbdevup=nbdevup,
@@ -364,8 +364,7 @@ def chaikin_money_flow(high, low, close, volume, period):
             "Calculating Chaikin Money Flow for period = {}".format(period))
         check_period_type(period)
         check_inputs_length(high, low, close, volume)
-        for data in (high, low, close, volume):
-            check_for_period_error(data, period)
+        
         mfv = ((close - low) - (high - close)) / (high - low)
         mfv = mfv.fillna(0.0)  # float division by zero
         mfv *= volume
@@ -384,7 +383,7 @@ def chande_momentum_oscillator(data, period):
             "Calculating Chande Momentum Oscillator for period = {}".format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         cmo_data = talib.CMO(data, timeperiod=period)
         return cmo_data
     except Exception as exception:
@@ -463,7 +462,7 @@ def detrended_price_oscillator(data, period):
             "Calculating Detrended Price Oscillator for period = {}".format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         dpo = data.shift(int((0.5 * period) + 1),
                          fill_value=data.mean()) - data.rolling(
                              period, min_periods=0).mean()
@@ -494,7 +493,7 @@ def donchian_channel(data, period):
         logger.info(
             "Calculating Donchian Channels for period = {}".format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         #dc high band
         dc_high_band = data.rolling(period, min_periods=0).max()
 
@@ -533,7 +532,7 @@ def double_ema(data, period):
             "Calculating Double Exponential Moving Average for period = {}".
             format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         dema_data = talib.DEMA(data, period)
         return dema_data
     except Exception as exception:
@@ -576,7 +575,7 @@ def ema(data, period):
             "Calculating Exponential Moving Average for period = {}".format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         ema_data = talib.EMA(data, timeperiod=period)
         return ema_data
     except Exception as exception:
@@ -655,7 +654,7 @@ def know_sure_thing(data: Any, r1: int, r2: int, r3: int, r4: int, n1: int,
         logger.info("Calculating Know Sure Thing...")
         for period in (r1, r2, r3, r4, n1, n2, n3, n4, nsig):
             check_period_type(period)
-            check_for_period_error(data, period)
+            
         rocma1 = ((data - data.shift(r1, fill_value=data.mean())) /
                   data.shift(r1, fill_value=data.mean())).rolling(
                       n1, min_periods=0).mean()
@@ -681,7 +680,7 @@ def linear_regression(data, period):
         logger.info(
             'Calculating Linear Regression for period = {}'.format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         lr_data = talib.LINEARREG(data, timeperiod=period)
         return lr_data
     except Exception as exception:
@@ -696,7 +695,7 @@ def linear_regression_angle(data, period):
             'Calculating Linear Regression Angle for period = {}'.format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         lra_data = talib.LINEARREG_ANGLE(data, timeperiod=period)
         return lra_data
     except Exception as exception:
@@ -711,7 +710,7 @@ def linear_regression_intercept(data, period):
             'Calculating Linear Regression Intercept for period = {}'.format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         lri_data = talib.LINEARREG_INTERCEPT(data, timeperiod=period)
         return lri_data
     except Exception as exception:
@@ -726,7 +725,7 @@ def linear_regression_slope(data, period):
             'Calculating Linear Regression Slope for period = {}'.format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         lrs_data = talib.LINEARREG_SLOPE(data, timeperiod=period)
         return lrs_data
     except Exception as exception:
@@ -742,7 +741,7 @@ def macd(data, n_sign, short_period=12, long_period=26, fillna=False):
             .format(short_period, long_period))
         for period in (short_period, long_period):
             check_period_type(period)
-            check_for_period_error(data, period)
+            
         df = pd.DataFrame()
         emafast = talib.EMA(data, short_period)
         emaslow = talib.EMA(data, long_period)
@@ -781,7 +780,7 @@ def midpoint_over_period(data, period):
         logger.info(
             'Calculating Midpoint Over Period for period = {}'.format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         mop = talib.MIDPOINT(data, timeperiod=period)
         return mop
     except Exception as exception:
@@ -796,8 +795,7 @@ def midpoint_price_over_period(high, low, period):
             'Calculating Midpoint Price Over Period for period = {}'.format(
                 period))
         check_period_type(period)
-        for data in (high, low):
-            check_for_period_error(data, period)
+            
         check_inputs_length(high, low)
         mpop = talib.MIDPRICE(high, low, timeperiod=period)
         return mpop
@@ -853,7 +851,7 @@ def momentum(data, period):
     try:
         logger.info('Calculating Momentum for period = {}'.format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         momentum_data = talib.MOM(data, timeperiod=period)
         return momentum_data
     except Exception as exception:
@@ -867,7 +865,7 @@ def ma(data, period, matype=0):
         logger.info(
             'Calculating Moving Average for period = {}'.format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         ma_data = talib.MA(data, timeperiod=period, matype=matype)
         return ma_data
     except Exception as exception:
@@ -1003,7 +1001,7 @@ def percentage_price_oscillator(data, short_period, long_period, matype=0):
             .format(short_period, long_period))
         for period in (short_period, long_period):
             check_period_type(period)
-            check_for_period_error(data, period)
+            
         ppo_data = talib.PPO(data, short_period, long_period, matype)
         return ppo_data
     except Exception as exception:
@@ -1047,7 +1045,7 @@ def rate_of_change(data, period):
         logger.info(
             "Calculating Rate of Change for period = {}".format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         df = pd.DataFrame()
         df['rate_of_change'] = talib.ROC(data, timeperiod=period)
         df['rate_of_change_precentage'] = talib.ROCP(data, timeperiod=period)
@@ -1120,7 +1118,7 @@ def time_series_forecast(data, period):
         logger.info(
             'Calculating Time Series Forecast for period = {}'.format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         tsf_data = talib.TSF(data, timeperiod=period)
         return tsf_data
     except Exception as exception:
@@ -1134,7 +1132,7 @@ def trix(data, period):
         logger.info('Calculating Trix for period = {}'.format(period))
         trix_data = talib.TRIX(data, timeperiod=period)
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         return trix_data
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -1148,7 +1146,7 @@ def triangular_ma(data, period):
             'Calculating Triangular Moving Average for period = {}'.format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         tma_data = talib.TRIMA(data, timeperiod=period)
         return tma_data
     except Exception as exception:
@@ -1163,7 +1161,7 @@ def triple_ema(data, period):
             "Calculating Triple Exponential Moving Average for period = {}".
             format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         tema_data = talib.TEMA(data, timeperiod=period)
         return tema_data
     except Exception as exception:
@@ -1262,7 +1260,7 @@ def wma(data, period):
             'Calculating Weighted Moving Average for period = {}'.format(
                 period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         wma_data = talib.WMA(data, timeperiod=period)
         return wma_data
     except Exception as exception:
@@ -1391,7 +1389,7 @@ def coppock_curve(data, period):
     try:
         logger.info("Calculating Cappock Curve for period = {}".format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         M = data.diff(int(period * 11 / 10) - 1)
         N = data.shift(int(period * 11 / 10) - 1)
         ROC1 = M / N
@@ -1416,7 +1414,7 @@ def hull_moving_average(data, period):
         logger.info(
             'Calculating Hull Moving Average for period = {}'.format(period))
         check_period_type(period)
-        check_for_period_error(data, period)
+        
         hma = wma(2 * wma(data, int(period / 2)) - wma(data, period),
                   int(np.sqrt(period)))
         return hma
@@ -1715,7 +1713,7 @@ def vertical_horizontal_filter(data: Any, period: int):
         logger.info(
             'Calculating Vertical Horizontal Filter for period = {}'.format(
                 period))
-        check_for_period_error(data, period)
+        
         vhf = [
             abs(
                 np.max(data[idx + 1 - period:idx + 1]) -

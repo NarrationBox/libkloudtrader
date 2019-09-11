@@ -8,12 +8,12 @@ from libkloudtrader.exceptions import InvalidAlgorithmMode, EmptySymbolBucket, I
 from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
 from libkloudtrader.logs import start_logger
+import pybacktest
+#pd.set_option('display.max_columns', None)  # or 1000
+#pd.set_option('display.max_rows', None)  # or 1000
+#pd.set_option('display.max_colwidth', -1)  # or 199
 
-pd.set_option('display.max_columns', None)  # or 1000
-pd.set_option('display.max_rows', None)  # or 1000
-pd.set_option('display.max_colwidth', -1)  # or 199
-
-logger = start_logger(__name__)
+logger = start_logger(__name__,ignore_module='libkloudtrader.analysis')
 
 
 def generate_positions_and_handle_portfolio(symbol, signals, data, commission,
@@ -52,21 +52,26 @@ def backtest(strategy: str,
                                              start_date,
                                              end_date,
                                              interval=data_interval)
+            ohlc = pybacktest.load_from_yahoo('SPY')
+            bt = pybacktest.Backtest(locals()['strategy'](data_batch), strategy.__name__)
+            bt.ohlc()
+            '''
             signals = locals()['strategy'](data_batch)
+            '''
             logger.info("Received Signals from {}".format(strategy.__name__))
             #portfolio=generate_positions_and_handle_portfolio(symbol,signals,data_batch,float(commission),initial_capital,quantity=100)
             #print(portfolio)
-            print(signals)
+            #print(signals)
     except (KeyboardInterrupt, SystemExit):
         print('\n')
         logger.critical("User's keyboard prompt stopped {}".format(
             strategy.__name__))
     except Exception as exception:
         logger.critical('Exiting {}...‼️'.format(strategy.__name__))
-        logger.warning(
+        logger.error(
             'Oops! Something went wrong while your algorithm was being backtested. ⚠️'
         )
-        logger.error(exception)
+        raise exception
         exit()
 
     #print(return_data_from_enum(a,symbol,start_date, end_date))
@@ -76,7 +81,7 @@ def backtest(strategy: str,
 def live_trade(strategy_name: str,
                symbol_bucket: list,
                data_feed_type: str,
-               states: list = ['open'],
+               states: list = ['open','postmarket','close'],
                batch_size: int = 1000,
                feed_delay: float = 0.0,
                fake_feed: bool = False):
@@ -111,8 +116,8 @@ def live_trade(strategy_name: str,
             strategy_name.__name__))
     except Exception as exception:
         logger.critical('Exiting {}...‼️'.format(strategy_name.__name__))
-        logger.warning(
+        logger.error(
             'Oops! Something went wrong while your algorithm was being deployed to live markets. ⚠️'
         )
-        logger.error(exception)
+        raise exception
         exit()
