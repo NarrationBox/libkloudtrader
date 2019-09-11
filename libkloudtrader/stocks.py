@@ -17,7 +17,7 @@ from .exceptions import (
     BadRequest,
     InvalidCredentials,
 )
-from .config import *
+from .logs import start_logger
 """Config starts"""
 
 USER_ACCESS_TOKEN = os.environ['USER_ACCESS_TOKEN']
@@ -26,6 +26,8 @@ USER_BROKERAGE = os.environ['USER_BROKERAGE']
 TR_STREAMING_API_URL = "https://stream.tradier.com"
 TR_BROKERAGE_API_URL = "https://production-api.tradier.com"
 TR_SANDBOX_BROKERAGE_API_URL = "https://production-sandbox.tradier.com"
+
+logger = start_logger(__name__)
 
 
 def tr_get_headers(access_token: str) -> dict:
@@ -95,8 +97,10 @@ def latest_price_info(symbols: str,
             else:
                 return pandas.DataFrame([data])
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -165,11 +169,13 @@ def latest_quote(
                     converted_askdate).strftime("%Y-%m-%d %H:%M:%S")
                 return _quotes
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
         if response.text == "Session not found":
             live_quotes(symbol)
         else:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
 
 
@@ -215,11 +221,13 @@ def latest_trade(
                     converted_date).strftime("%Y-%m-%d %H:%M:%S")
                 return trades
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
         if response.text == "Session not found":
             live_quotes(symbol)
         else:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
 
 
@@ -233,6 +241,7 @@ def intraday_summary(
     """Get live summary"""
     # for flagging trades:
     # https://docs.dxfeed.com/misc/dxFeed_TimeAndSale_Sale_Conditions.htm
+
     if brokerage == "miscpaper":
         access_token = os.environ["KT_ACCESS_TOKEN"]
     elif brokerage == "Tradier Inc.":
@@ -262,67 +271,14 @@ def intraday_summary(
                 summary = json.loads(line)
                 return summary
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
         if response.text == "Session not found":
             live_quotes(symbol)
         else:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
-
-
-def ohlcv(symbol: str,
-          start: str,
-          end: str,
-          interval: str = "daily",
-          brokerage: typing.Any = USER_BROKERAGE,
-          access_token: str = USER_ACCESS_TOKEN,
-          dataframe: bool = True) -> dict:
-    """Get OHLCV(Open-High-Low-Close-Volume) data for a symbol (As back as you want to go)"""
-    if brokerage == "Tradier Inc.":
-        url = TR_BROKERAGE_API_URL
-    elif brokerage == "miscpaper":
-        url = TR_SANDBOX_BROKERAGE_API_URL
-    else:
-        raise InvalidBrokerage
-
-    if interval == "1d":
-        interval = "daily"
-    elif interval == "1w":
-        interval = "weekly"
-    elif interval == "1M":
-        interval = "monthly"
-    elif interval == "tick":
-        return tick_data(symbol,
-                         start,
-                         end,
-                         data_filter='open',
-                         brokerage=brokerage,
-                         access_token=access_token,
-                         dataframe=True)
-    params: dict = {
-        "symbol": str(symbol.upper()),
-        "start": str(start),
-        "end": str(end),
-        "interval": str(interval.lower()),
-    }
-    response = requests.get(
-        "{}/v1/markets/history?".format(url),
-        params=params,
-        headers=tr_get_headers(access_token),
-    )
-    if response:
-        if not dataframe:
-            return response.json()
-        else:
-            data = response.json()['history']['day']
-            dataframe = pandas.DataFrame(data)
-            dataframe['date'] = pandas.to_datetime(dataframe['date'])
-            dataframe.set_index(['date'], inplace=True)
-            return dataframe
-    if response.status_code == 400:
-        raise BadRequest(response.text)
-    if response.status_code == 401:
-        raise InvalidCredentials(response.text)
 
 
 def tick_data(symbol: str,
@@ -333,12 +289,13 @@ def tick_data(symbol: str,
               access_token: str = USER_ACCESS_TOKEN,
               dataframe: bool = True) -> dict:
     """Get historical tick data(trades placed) for a particular period of time. 
-    Goes upto 5 days in the past."""
+    Data available for 5 days in the past."""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     params = {
         "symbol": str.upper(symbol),
@@ -363,10 +320,13 @@ def tick_data(symbol: str,
                 dataframe.set_index(['time'], inplace=True)
                 return dataframe
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -377,13 +337,14 @@ def min1_bar_data(symbol: str,
                   brokerage: typing.Any = USER_BROKERAGE,
                   access_token: str = USER_ACCESS_TOKEN,
                   dataframe: bool = True) -> dict:
-    """Get historical bar data with 1 minute interval for a given period of time. 
+    """Not in docs. Used in ohlcv(). Get historical bar data with 1 minute interval for a given period of time. 
     Goes upto 20 days with data points during open market. Goes upto 10 days will all data points."""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     params = {
         "symbol": str.upper(symbol),
@@ -408,8 +369,10 @@ def min1_bar_data(symbol: str,
             dataframe.set_index(['time'], inplace=True)
             return dataframe
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -422,13 +385,14 @@ def min5_bar_data(
         access_token: str = USER_ACCESS_TOKEN,
         dataframe: bool = True,
 ) -> dict:
-    """Get historical bar data with 5 minute interval for a given period of time. 
+    """Not in docs. Used in ohlcv(). Get historical bar data with 5 minute interval for a given period of time. 
     Goes upto 40 days with data points duing open market. Goes upto 18 days will all data points."""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     params = {
         "symbol": str.upper(symbol),
@@ -452,8 +416,10 @@ def min5_bar_data(
             dataframe.set_index(['time'], inplace=True)
             return dataframe
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -464,13 +430,14 @@ def min15_bar_data(symbol: str,
                    brokerage: typing.Any = USER_BROKERAGE,
                    access_token: str = USER_ACCESS_TOKEN,
                    dataframe: bool = True) -> dict:
-    """Get historical bar data with 15 minute interval for a given period of time. 
+    """Not in docs. Used in ohlcv(). Get historical bar data with 15 minute interval for a given period of time. 
     Goes upto 40 days with data points duing open market. Goes upto 18 days will all data points."""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     params = {
         "symbol": str.upper(symbol),
@@ -494,8 +461,88 @@ def min15_bar_data(symbol: str,
             dataframe.set_index(['time'], inplace=True)
             return dataframe
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise InvalidCredentials(response.text)
+
+
+def ohlcv(symbol: str,
+          start: str,
+          end: str,
+          interval: str = "1d",
+          brokerage: typing.Any = USER_BROKERAGE,
+          access_token: str = USER_ACCESS_TOKEN,
+          dataframe: bool = True) -> dict:
+    """Get OHLCV(Open-High-Low-Close-Volume) data for a symbol (As back as you want to go)"""
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise InvalidBrokerage
+    if interval not in ("1d", "1w", "1M", "1m", "5m", "15m"):
+        logger.error('Oops! An error Occurred ⚠️')
+        raise InvlaidTimeInterval(
+            'Invalid Time Interval. Available time intervals for this function are: "1d","1w","1M","1m","5m","15m" '
+        )
+    if interval == "1d":
+        interval = "daily"
+    elif interval == "1w":
+        interval = "weekly"
+    elif interval == "1M":
+        interval = "monthly"
+    elif interval == "1m":
+        return min1_bar_data(symbol,
+                             start,
+                             end,
+                             data_filter='open',
+                             brokerage=brokerage,
+                             access_token=access_token,
+                             dataframe=True)
+    elif interval == "5m":
+        return min5_bar_data(symbol,
+                             start,
+                             end,
+                             data_filter='open',
+                             brokerage=brokerage,
+                             access_token=access_token,
+                             dataframe=True)
+    elif interval == "15m":
+        return min15_bar_data(symbol,
+                              start,
+                              end,
+                              data_filter='open',
+                              brokerage=brokerage,
+                              access_token=access_token,
+                              dataframe=True)
+    params: dict = {
+        "symbol": str(symbol.upper()),
+        "start": str(start),
+        "end": str(end),
+        "interval": str(interval.lower()),
+    }
+    response = requests.get(
+        "{}/v1/markets/history?".format(url),
+        params=params,
+        headers=tr_get_headers(access_token),
+    )
+    if response:
+        if not dataframe:
+            return response.json()
+        else:
+            data = response.json()['history']['day']
+            dataframe = pandas.DataFrame(data)
+            dataframe['date'] = pandas.to_datetime(dataframe['date'])
+            dataframe.set_index(['date'], inplace=True)
+            return dataframe
+    if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -503,24 +550,36 @@ def stream_live_quotes(symbol: str,
                        brokerage: str = USER_BROKERAGE,
                        access_token: str = USER_ACCESS_TOKEN):
     """Stream live quotes"""
-    while True:
-        yield latest_quote(symbol)
+    try:
+        while True:
+            yield latest_quote(symbol)
+    except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise exception
 
 
 def stream_live_trades(symbol: str,
                        brokerage: str = USER_BROKERAGE,
                        access_token: str = USER_ACCESS_TOKEN):
     """Stream live trades"""
-    while True:
-        yield latest_trade(symbol)
+    try:
+        while True:
+            yield latest_trade(symbol)
+    except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise exception
 
 
 def stream_live_summary(symbol: str,
                         brokerage: str = USER_BROKERAGE,
                         access_token: str = USER_ACCESS_TOKEN):
     """Stream live summary"""
-    while True:
-        yield intraday_summary(symbol)
+    try:
+        while True:
+            yield intraday_summary(symbol)
+    except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise exception
 
 
 def list_of_companies(exchange: str = "all"):
@@ -561,6 +620,7 @@ def list_of_companies(exchange: str = "all"):
         del dataframe["Unnamed: 8"]
         return dataframe
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -572,6 +632,7 @@ def intraday_status(brokerage: typing.Any = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/v1/markets/clock".format(url),
@@ -580,8 +641,10 @@ def intraday_status(brokerage: typing.Any = USER_BROKERAGE,
     if response:
         return response.json()['clock']
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -596,8 +659,10 @@ def market_calendar(month: int, year: int) -> dict:
     if response:
         return response.json()["calendar"]
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -613,6 +678,7 @@ def symbol_search(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/v1/markets/search?q={}&indexes={}".format(url, str(company_name),
@@ -622,8 +688,10 @@ def symbol_search(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -646,8 +714,10 @@ def symbol_lookup(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -673,8 +743,10 @@ def shortable_securities(brokerage: typing.Any = USER_BROKERAGE,
             dataframe = pandas.DataFrame(data)
             return dataframe
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -693,6 +765,7 @@ def check_if_shortable(symbol: str,
         else:
             return data
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -707,6 +780,7 @@ def company_fundamentals(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/beta/markets/fundamentals/company?symbols={}".format(
@@ -716,8 +790,10 @@ def company_fundamentals(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -732,6 +808,7 @@ def corporate_calendar(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/beta/markets/fundamentals/calendars?symbols={}".format(
@@ -741,8 +818,10 @@ def corporate_calendar(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -757,6 +836,7 @@ def dividend_information(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/beta/markets/fundamentals/dividends?symbols={}".format(
@@ -766,8 +846,10 @@ def dividend_information(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -782,6 +864,7 @@ def corporate_actions(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/beta/markets/fundamentals/corporate_actions?symbols={}".format(
@@ -791,8 +874,10 @@ def corporate_actions(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -807,6 +892,7 @@ def operation_ratio(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/beta/markets/fundamentals/ratios?symbols={}".format(
@@ -816,8 +902,10 @@ def operation_ratio(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -832,6 +920,7 @@ def corporate_financials(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/beta/markets/fundamentals/financials?symbols={}".format(
@@ -841,8 +930,10 @@ def corporate_financials(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -857,6 +948,7 @@ def price_statistics(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get(
         "{}/beta/markets/fundamentals/statistics?symbols={}".format(
@@ -866,8 +958,10 @@ def price_statistics(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -894,6 +988,7 @@ def buy_preview(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         "class": "equity",
@@ -914,8 +1009,10 @@ def buy_preview(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -939,6 +1036,7 @@ def buy_to_cover_preview(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         "class": "equity",
@@ -959,8 +1057,10 @@ def buy_to_cover_preview(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -981,6 +1081,7 @@ def sell_preview(symbol: str,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         'class': 'equity',
@@ -1000,8 +1101,10 @@ def sell_preview(symbol: str,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1023,6 +1126,7 @@ def sell_short_preview(symbol: str,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         'class': 'equity',
@@ -1042,8 +1146,10 @@ def sell_short_preview(symbol: str,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1066,6 +1172,7 @@ def buy(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         "class": "equity",
@@ -1085,8 +1192,10 @@ def buy(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1109,6 +1218,7 @@ def buy_to_cover(
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         "class": "equity",
@@ -1128,8 +1238,10 @@ def buy_to_cover(
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1150,6 +1262,7 @@ def sell(symbol: str,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         'class': 'equity',
@@ -1168,8 +1281,10 @@ def sell(symbol: str,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1190,6 +1305,7 @@ def sell_short(symbol: str,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     post_params = {
         'class': 'equity',
@@ -1208,8 +1324,10 @@ def sell_short(symbol: str,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1242,8 +1360,10 @@ def change_order(order_id: str,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1257,6 +1377,7 @@ def cancel_order(order_id: str,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.delete("{}/v1/accounts/{}/orders/{}".format(
         url, account_number, order_id),
@@ -1264,8 +1385,10 @@ def cancel_order(order_id: str,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1281,14 +1404,17 @@ def user_profile(brokerage: typing.Any = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/user/profile".format(url),
                             headers=tr_get_headers(access_token))
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1300,6 +1426,7 @@ def user_account_number(brokerage: typing.Any = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/user/profile".format(url),
                             headers=tr_get_headers(access_token))
@@ -1308,8 +1435,10 @@ def user_account_number(brokerage: typing.Any = USER_BROKERAGE,
         account_numbers = [row['account_number'] for row in data]
         return account_numbers
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1322,6 +1451,7 @@ def account_balance(brokerage: typing.Any = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/accounts/{}/balances".format(
         url, account_number),
@@ -1329,8 +1459,10 @@ def account_balance(brokerage: typing.Any = USER_BROKERAGE,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1343,6 +1475,7 @@ def account_positions(brokerage: typing.Any = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/accounts/{}/positions".format(
         url, account_number),
@@ -1350,8 +1483,10 @@ def account_positions(brokerage: typing.Any = USER_BROKERAGE,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1364,6 +1499,7 @@ def account_history(brokerage: str = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/accounts/{}/history".format(
         url, account_number),
@@ -1371,8 +1507,10 @@ def account_history(brokerage: str = USER_BROKERAGE,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1386,6 +1524,7 @@ def account_closed_positions(brokerage: str = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/accounts/{}/gainloss".format(
         url, account_number),
@@ -1393,8 +1532,10 @@ def account_closed_positions(brokerage: str = USER_BROKERAGE,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1407,6 +1548,7 @@ def account_orders(brokerage: str = USER_BROKERAGE,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/accounts/{}/orders".format(
         url, account_number),
@@ -1414,8 +1556,10 @@ def account_orders(brokerage: str = USER_BROKERAGE,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 
@@ -1429,6 +1573,7 @@ def get_order(order_id: str,
     elif brokerage == "miscpaper":
         url = TR_SANDBOX_BROKERAGE_API_URL
     else:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
     response = requests.get("{}/v1/accounts/{}/orders/{}".format(
         url, account_number, order_id),
@@ -1436,8 +1581,10 @@ def get_order(order_id: str,
     if response:
         return response.json()
     if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
         raise BadRequest(response.text)
     if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
         raise InvalidCredentials(response.text)
 
 

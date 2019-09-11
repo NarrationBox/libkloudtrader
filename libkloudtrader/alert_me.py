@@ -17,6 +17,7 @@ SNS_TOPIC_ARN = os.environ['ALERT_ME_STA']
 def sms(number: str, message: str) -> str:
     '''Send SMS'''
     try:
+        logger.info("Alert Created for {}...".format(number))
         client = boto3.client("sns",
                               aws_access_key_id=AWS_ACCESS_KEY_ID,
                               aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
@@ -27,6 +28,7 @@ def sms(number: str, message: str) -> str:
         logger.info("Alert Created for {}".format(number))
         return True
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -35,8 +37,9 @@ def email(email_id: str,
           sender: str = "alerts@kloudtrader.com",
           subject: str = "KloudTrader Narwhal Alerts") -> str:
     '''Send Email'''
-    client = boto3.client('ses', region_name=AWS_DEFAULT_REGION)
     try:
+        logger.info("Alert Created for {}...".format(email))
+        client = boto3.client('ses', region_name=AWS_DEFAULT_REGION)
         client.send_email(
             Destination={
                 'ToAddresses': [
@@ -60,6 +63,7 @@ def email(email_id: str,
         logger.info("Alert Created for {}".format(email_id))
         return True
     except ClientError as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception.response['Error']['Message']
 
 
@@ -68,10 +72,7 @@ def sms_and_email(number: str, email_id: str, message: str) -> str:
     try:
         sms(number, message)
         email(email_id, message)
-
         return True
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
-
-
-sms_and_email('+919871766213', 'chetanalwaysmalhotra@gmail.com', 'Hello there')

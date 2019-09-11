@@ -47,19 +47,19 @@ class Test_market_structure:
 class Test_quotes:
     def test_return_type(self):
         '''test return type'''
-        data=crypto.quotes('BTC/USD')
+        data=crypto.latest_price_info('BTC/USD')
         assert isinstance(data,dict) and not 'message' in data
 
     def test_retured_data(self):
         '''test returned data'''
-        data=crypto.quotes('BTC/USD')
+        data=crypto.latest_price_info('BTC/USD')
         assert 'high','low' in data
 
 
 class Test_quotes_for_all_symbols:
     def test_return_type(self):
         '''test return type'''
-        data=crypto.quotes_for_all_symbols(exchange="binance")
+        data=crypto.latest_price_info_for_all_symbols(exchange="binance")
         assert isinstance(data,dict) and not 'message' in data
 
 class Test_ohlcv:
@@ -89,12 +89,12 @@ class Test_ohlcv:
 class Test_trades:
     def test_return_type(self):
         '''test return type'''
-        data=crypto.trades('ETH/BTC',exchange="binance",number_of_data_points=5)
+        data=crypto.latest_trades('ETH/BTC',exchange="binance",number_of_data_points=5)
         assert isinstance(data,list) and not 'message' in data
 
     def test_number_data_points(self):
         '''test number of data points'''
-        data=crypto.trades('ETH/BTC',exchange="binance",number_of_data_points=5)
+        data=crypto.latest_trades('ETH/BTC',exchange="binance",number_of_data_points=5)
         assert len(data)==5
 
 class Test_order_book:

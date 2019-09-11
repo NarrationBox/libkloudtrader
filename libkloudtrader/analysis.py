@@ -12,9 +12,8 @@ from libkloudtrader.logs import start_logger
 from libkloudtrader.exceptions import AnalysisException
 
 logger = start_logger(__name__)
-
-
 '''Not in docs. helper functions'''
+
 
 def check_for_period_error(data: Any, period: int):
     """
@@ -438,7 +437,7 @@ def daily_returns(data):
     """Daily Returns"""
     try:
         logger.info("Calculating Daily Returns...")
-        dr_data = data.pct_change(1)
+        dr_data = data.pct_change()
         return pd.Series(dr_data, name="daily_returns")
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -1081,12 +1080,14 @@ def standard_deviation(data: Any):
         raise exception
 
 
-def moving_standard_deviation(close, period, nbdev=1):
+def moving_standard_deviation(data, period):
+    """Moving standard deviation"""
     try:
-
-        pass
+        logger.info("Calculating Moving Standar Deviation for period = {}".format(period))
+        return data.rolling(period).std()
     except Exception as exception:
         raise exception
+    logger.error('Oops! An error Occurred ⚠️')
 
 
 def stochastic_rsi(data,

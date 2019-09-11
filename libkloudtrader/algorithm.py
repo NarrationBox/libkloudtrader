@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 import random
 import time
 import numpy as np
@@ -9,36 +9,68 @@ from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
 from libkloudtrader.logs import start_logger
 
+pd.set_option('display.max_columns', None)  # or 1000
+pd.set_option('display.max_rows', None)  # or 1000
+pd.set_option('display.max_colwidth', -1)  # or 199
+
 logger = start_logger(__name__)
 
 
-def backtest(symbol: str,
-             strategy: str,
-             data: str,
-             start_date: Any = None,
-             end_date: Any = None,
-             data_interval: str = '1d',
-             initial_capital: float = None,
-             comission: float = 0,
-             preferred_benchmark: str):
+def generate_positions_and_handle_portfolio(symbol, signals, data, commission,
+                                            initial_capital, quantity):
+    try:
+        initial_capital = float(initial_capital)
+        positions = pd.DataFrame(index=signals.index).fillna(0.0)
+        positions['Positions in' + " " +
+                  symbol] = (quantity * signals['signal']) + commission
+        portfolio = positions.multiply(data['close'], axis=0)
+        poss_diff = positions.diff()
+        portfolio['holdings'] = (positions.multiply(data['close'],
+                                                    axis=0)).sum(axis=1)
+        return portfolio
+    except Exception as exception:
+        raise exception
 
-    data_to_backtest = Data_Types[data].value
-    print(
-        data_to_backtest(symbol, start_date, end_date, interval=data_interval))
+
+def backtest(strategy: str,
+             symbol_bucket: List[str],
+             data: str,
+             start_date: Any,
+             end_date: Any,
+             preferred_benchmark: str,
+             data_interval: str = '1d',
+             initial_capital: float = 100000,
+             commission: float = 0):
+    """Backtester function"""
+    try:
+        logger.info(
+            'Starting Backtest for {} from {} to {} with initial capital = {}'.
+            format(strategy.__name__, start_date, end_date, initial_capital))
+        data_to_backtest_on = Data_Types[data].value
+        for symbol in symbol_bucket:
+            data_batch = data_to_backtest_on(symbol,
+                                             start_date,
+                                             end_date,
+                                             interval=data_interval)
+            signals = locals()['strategy'](data_batch)
+            logger.info("Received Signals from {}".format(strategy.__name__))
+            #portfolio=generate_positions_and_handle_portfolio(symbol,signals,data_batch,float(commission),initial_capital,quantity=100)
+            #print(portfolio)
+            print(signals)
+    except (KeyboardInterrupt, SystemExit):
+        print('\n')
+        logger.critical("User's keyboard prompt stopped {}".format(
+            strategy.__name__))
+    except Exception as exception:
+        logger.critical('Exiting {}...‼️'.format(strategy.__name__))
+        logger.warning(
+            'Oops! Something went wrong while your algorithm was being backtested. ⚠️'
+        )
+        logger.error(exception)
+        exit()
+
     #print(return_data_from_enum(a,symbol,start_date, end_date))
     #print(locals()[a](symbol, start_date, end_date))
-    '''
-    initial_capital=float(initial_capital)
-    positions=pd.DataFrame(index=signals_dataframe.index).fillna(0.0)
-    positions['Positions in TSLA']=1000*signals_dataframe['signal']
-    portfolio=positions.multiply(data['close'],axis=0)
-    pos_diff=positions.diff()
-    portfolio['holdings']=(positions.multiply(data['close'],axis=0).sum(axis=1))
-    portfolio['cash']=initial_capital-(pos_diff.multiply(data['close'],axis=0)).sum(axis=1).cumsum()
-    portfolio['total']=portfolio['cash']+portfolio['holdings']
-    portfolio['returns']=portfolio['total'].pct_change()
-    print(portfolio.tail(10))'''
-    return strategy.__name__
 
 
 def live_trade(strategy_name: str,

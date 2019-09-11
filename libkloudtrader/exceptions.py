@@ -41,3 +41,8 @@ class InvalidDataFeedType(Exception):
 class AnalysisException(Exception):
     """Exception raised if something goes wrong in libkloudtrader.analysis"""
     pass
+
+
+class InvlaidTimeInterval(Exception):
+    """Exception raised if input interval for historical data apis is invalid"""
+    pass

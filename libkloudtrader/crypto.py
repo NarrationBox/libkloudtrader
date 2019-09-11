@@ -5,7 +5,10 @@ from typing import Any
 import datetime
 import pandas
 from .exceptions import BadRequest, InvalidCredentials
+from .logs import start_logger
 """Config starts"""
+
+logger = start_logger(__name__)
 
 CRYPTO_EXCHANGE = os.environ['CRYPTO_EXCHANGE']
 CRYPTO_API_KEY = os.environ['CRYPTO_API_KEY']
@@ -45,6 +48,7 @@ def list_of_exchanges(test_mode: bool = False) -> list:
         if response.status_code == 401:
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -57,10 +61,13 @@ def exchange_structure(exchange: str = CRYPTO_EXCHANGE) -> dict:
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -74,10 +81,13 @@ def exchange_attribute(attribute: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -89,10 +99,13 @@ def markets(exchange: str = CRYPTO_EXCHANGE) -> dict:
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -107,14 +120,17 @@ def market_structure(symbol: str, exchange: str = CRYPTO_EXCHANGE) -> dict:
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def quotes(symbol: str, exchange: str = CRYPTO_EXCHANGE) -> dict:
+def latest_price_info(symbol: str, exchange: str = CRYPTO_EXCHANGE) -> dict:
     """Get quotes/ticker data for a given symbool from the given exchange"""
     try:
         url = CRYPTO_URL_LIVE
@@ -124,14 +140,17 @@ def quotes(symbol: str, exchange: str = CRYPTO_EXCHANGE) -> dict:
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def quotes_for_all_symbols(exchange: str = CRYPTO_EXCHANGE) -> dict:
+def latest_price_info_for_all_symbols(exchange: str = CRYPTO_EXCHANGE) -> dict:
     """Get quotes/ticker data for all symbols listed on an exchange"""
     try:
         url = CRYPTO_URL_LIVE
@@ -140,10 +159,13 @@ def quotes_for_all_symbols(exchange: str = CRYPTO_EXCHANGE) -> dict:
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -186,14 +208,16 @@ def ohlcv(symbol: str,
         if response.status_code == 400:
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def trades(symbol: str,
-           number_of_data_points: int = 0,
-           exchange: str = CRYPTO_EXCHANGE):
+def latest_trades(symbol: str,
+                  number_of_data_points: int = 0,
+                  exchange: str = CRYPTO_EXCHANGE):
     """Get recent trades for a particular trading symbol."""
     try:
         url = CRYPTO_URL_LIVE
@@ -207,10 +231,13 @@ def trades(symbol: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -234,12 +261,28 @@ def order_book(symbol: str,
         response = requests.post('{}/order_book/{}'.format(url, exchange),
                                  json=payload)
         if response:
-            return response.json()
+            latest_orderbook_entry_dict = {}
+            latest_orderbook_entry_dict['symbol'] = symbol
+            latest_orderbook_entry_dict['ask'] = response.json(
+            )['asks'][0][0] if len(response.json()['asks']) > 0 else None
+            latest_orderbook_entry_dict['asksize'] = response.json(
+            )['asks'][0][1] if len(response.json()['asks']) > 0 else None
+            latest_orderbook_entry_dict['bid'] = response.json(
+            )['bids'][0][0] if len(response.json()['bids']) > 0 else None
+            latest_orderbook_entry_dict['bidsize'] = response.json(
+            )['bids'][0][1] if len(response.json()['bids']) > 0 else None
+            latest_orderbook_entry_dict['datetime'] = response.json(
+            )['datetime']
+            latest_orderbook_entry_dict['nonce'] = response.json()['nonce']
+            return latest_orderbook_entry_dict
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -256,12 +299,28 @@ def L2_order_book(symbol: str,
         response = requests.post('{}/L2_order_book/{}'.format(url, exchange),
                                  json=payload)
         if response:
-            return response.json()
+            latest_orderbook_entry_dict = {}
+            latest_orderbook_entry_dict['symbol'] = symbol
+            latest_orderbook_entry_dict['ask'] = response.json(
+            )['asks'][0][0] if len(response.json()['asks']) > 0 else None
+            latest_orderbook_entry_dict['asksize'] = response.json(
+            )['asks'][0][1] if len(response.json()['asks']) > 0 else None
+            latest_orderbook_entry_dict['bid'] = response.json(
+            )['bids'][0][0] if len(response.json()['bids']) > 0 else None
+            latest_orderbook_entry_dict['bidsize'] = response.json(
+            )['bids'][0][1] if len(response.json()['bids']) > 0 else None
+            latest_orderbook_entry_dict['datetime'] = response.json(
+            )['datetime']
+            latest_orderbook_entry_dict['nonce'] = response.json()['nonce']
+            return latest_orderbook_entry_dict
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -273,10 +332,13 @@ def currencies(exchange: str = CRYPTO_EXCHANGE):
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -303,10 +365,13 @@ def user_balance(exchange: str = CRYPTO_EXCHANGE,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -332,10 +397,13 @@ def user_ledger(currency_code: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -361,10 +429,13 @@ def user_trades(symbol: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -390,10 +461,13 @@ def user_closed_orders(symbol: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -420,10 +494,13 @@ def get_order(order_id: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -449,10 +526,13 @@ def user_orders(symbol: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -475,10 +555,13 @@ def user_positions(exchange: str = CRYPTO_EXCHANGE,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -504,10 +587,13 @@ def create_deposit_address(currency_code: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -533,10 +619,13 @@ def user_deposits(currency_code: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -562,10 +651,13 @@ def user_deposit_address(currency_code: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -591,10 +683,13 @@ def user_withdrawls(currency_code: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -620,10 +715,13 @@ def user_transactions(currency_code: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -661,10 +759,13 @@ def buy(symbol: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -698,10 +799,13 @@ def sell(symbol: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -727,10 +831,13 @@ def cancel_order(order_id: str,
         if response:
             return response.json()
         if response.status_code == 400:
+            logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
         if response.status_code == 401:
+            logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -783,3 +890,12 @@ def incoming_tick_data_handler_level2(symbol: str,
     latest_orderbook_entry_dict['tradesize'] = latest_trades[0]['amount']
     latest_orderbook_entry_dict['tradedate'] = latest_trades[0]['datetime']
     return latest_orderbook_entry_dict
+
+
+'''
+import time
+
+while True:
+    print(order_book('BTC/USD'))
+    time.sleep(2)
+'''
