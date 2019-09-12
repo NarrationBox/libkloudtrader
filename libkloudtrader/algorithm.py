@@ -8,7 +8,7 @@ from libkloudtrader.exceptions import InvalidAlgorithmMode, EmptySymbolBucket, I
 from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
 from libkloudtrader.logs import start_logger
-#import pybacktest
+import pybacktest
 #pd.set_option('display.max_columns', None)  # or 1000
 #pd.set_option('display.max_rows', None)  # or 1000
 #pd.set_option('display.max_colwidth', -1)  # or 199
@@ -52,9 +52,9 @@ def backtest(strategy: str,
                                              start_date,
                                              end_date,
                                              interval=data_interval)
-            #ohlc = pybacktest.load_from_yahoo('SPY')
-            #bt = pybacktest.Backtest(locals()['strategy'](data_batch), strategy.__name__)
-            #bt.ohlc()
+            ohlc = pybacktest.load_from_yahoo('SPY')
+            bt = pybacktest.Backtest(locals()['strategy'](data_batch), strategy.__name__)
+            print(bt.report)
             '''
             signals = locals()['strategy'](data_batch)
             '''

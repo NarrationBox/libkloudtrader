@@ -8,7 +8,6 @@ def start_logger(module,ignore_module=None):
     logging.getLogger('boto3').setLevel(logging.CRITICAL)
     logging.getLogger('botocore').setLevel(logging.CRITICAL)
     if ignore_module:
-        print('he')
         logging.getLogger(ignore_module).setLevel(logging.CRITICAL)
     logger = logging.getLogger(module)
     return logger

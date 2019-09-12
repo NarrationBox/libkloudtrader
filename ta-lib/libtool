@@ -44,7 +44,7 @@ available_tags=" CXX"
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host fa0108e2dc91:
+# Libtool was configured on host 870b2b07e9f9:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"
@@ -7223,7 +7223,7 @@ disable_libs=static
 # End:
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
-# Libtool was configured on host fa0108e2dc91:
+# Libtool was configured on host 870b2b07e9f9:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"

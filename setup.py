@@ -15,7 +15,6 @@ setup(
         "boto3",
         "pandas",
         "numpy",
-        "empyrical",
-        "TA-Lib"
+        "empyrical"
     ],
 )

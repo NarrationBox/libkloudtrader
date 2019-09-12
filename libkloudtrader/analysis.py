@@ -14,6 +14,13 @@ from libkloudtrader.exceptions import AnalysisException
 logger = start_logger(__name__)
 '''Not in docs. helper functions'''
 
+def fill_for_noncomputable_vals(input_data, result_data):
+    """Fill non computed series/dataframe values with Nan"""
+    non_computable_values = np.repeat(
+        np.nan, len(input_data) - len(result_data)
+        )
+    filled_result_data = np.append(non_computable_values, result_data)
+    return filled_result_data
 
 def check_for_period_error(data: Any, period: int):
     """
@@ -96,6 +103,19 @@ def awesome_oscillator(high, low, short_period=5, long_period=34):
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
+def momentum(data, period):
+    '''Calculate momentum for a given period'''
+    try:
+        logger.info("Calculating Momentum for period = {}".format(period))
+        check_period_type(period)
+        check_for_period_error(data,period)
+        momentum = [data[i] - data[i+1-period] for i in range(period-1, len(data))]
+        momentum = fill_for_noncomputable_vals(data, momentum)
+        return pd.Series(momentum,name="momentum",index=data.index)
+    except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise exception
+
 
 def money_flow_index(high, low, close, volume, period):
     """Money Flow Index"""
@@ -132,6 +152,7 @@ def money_flow_index(high, low, close, volume, period):
 
         return mr
     except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
@@ -147,8 +168,8 @@ def relative_strength_index(data, period):
         which_dn = diff < 0
         up, dn = diff, diff * 0
         up[which_dn], dn[which_dn] = 0, -up[which_dn]
-        emaup = talib.EMA(up, period)
-        emadn = talib.EMA(dn, period)
+        emaup = up.ewm(span=period, min_periods=period).mean()
+        emadn = dn.ewm(span=period, min_periods=period).mean()
         rsi = 100 * emaup / (emaup + emadn)
         return rsi
     except Exception as exception:
@@ -531,9 +552,10 @@ def double_ema(data, period):
         logger.info(
             "Calculating Double Exponential Moving Average for period = {}".
             format(period))
-        check_period_type(period)
-        
-        dema_data = talib.DEMA(data, period)
+        check_period_type(period) 
+        ema1=data.ewm(span=period, min_periods=period).mean()
+        ema2=ema1.ewm(span=period, min_periods=period).mean()
+        dema_data=2*ema1-(ema2)
         return dema_data
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -576,8 +598,8 @@ def ema(data, period):
                 period))
         check_period_type(period)
         
-        ema_data = talib.EMA(data, timeperiod=period)
-        return ema_data
+        ema_data = data.ewm(span=period, min_periods=period).mean()
+        return pd.Series(ema_data,name="ema")
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -608,7 +630,7 @@ def ichimoku_cloud(high, low, short_period, medium_period, long_period):
         raise exception
 
 
-def kaufman_adaptive_moving_average(data, period):
+def kaufman_adaptive_moving_average(data:Any, period:int,  pow1:int=2, pow2:int=30):
     '''Kaufman Adaptive Moving Average'''
     try:
         logger.info(
@@ -616,8 +638,26 @@ def kaufman_adaptive_moving_average(data, period):
             format(period))
         check_period_type(period)
         check_inputs_length(data)
-        kama_data = talib.KAMA(data, timeperiod=period)
-        return kama_data
+        data_values = data.values
+        vol = pd.Series(abs(data - np.roll(data, 1)))
+        ER_num = abs(data_values - np.roll(data_values, period))
+        ER_den = vol.rolling(period).sum()
+        ER = ER_num / ER_den
+        sc = (( ER*(2.0/(pow1+1)-2.0/(pow2+1.0))+2/(pow2+1.0) ) ** 2.0).values
+        kama = np.zeros(sc.size)
+        N = len(kama)
+        first_value = True
+        for i in range(N):
+            if np.isnan(sc[i]):
+             kama[i] = np.nan
+            else:
+                if first_value:
+                    kama[i] = data_values[i]
+                    first_value = False
+                else:
+                    kama[i] = kama[i-1] + sc[i] * (data_values[i] - kama[i-1])
+        kama = pd.Series(kama, name='kama', index=data.index)
+        return kama
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -674,65 +714,6 @@ def know_sure_thing(data: Any, r1: int, r2: int, r3: int, r4: int, n1: int,
         raise exception
 
 
-def linear_regression(data, period):
-    """Linear Regression"""
-    try:
-        logger.info(
-            'Calculating Linear Regression for period = {}'.format(period))
-        check_period_type(period)
-        
-        lr_data = talib.LINEARREG(data, timeperiod=period)
-        return lr_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def linear_regression_angle(data, period):
-    """Linear Regression Angle"""
-    try:
-        logger.info(
-            'Calculating Linear Regression Angle for period = {}'.format(
-                period))
-        check_period_type(period)
-        
-        lra_data = talib.LINEARREG_ANGLE(data, timeperiod=period)
-        return lra_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def linear_regression_intercept(data, period):
-    """Linear Regression Intercept"""
-    try:
-        logger.info(
-            'Calculating Linear Regression Intercept for period = {}'.format(
-                period))
-        check_period_type(period)
-        
-        lri_data = talib.LINEARREG_INTERCEPT(data, timeperiod=period)
-        return lri_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def linear_regression_slope(data, period):
-    """Linear Regression Slope"""
-    try:
-        logger.info(
-            'Calculating Linear Regression Slope for period = {}'.format(
-                period))
-        check_period_type(period)
-        
-        lrs_data = talib.LINEARREG_SLOPE(data, timeperiod=period)
-        return lrs_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
 def macd(data, n_sign, short_period=12, long_period=26, fillna=False):
     """Moving Average Convergence Divergence"""
     try:
@@ -743,10 +724,10 @@ def macd(data, n_sign, short_period=12, long_period=26, fillna=False):
             check_period_type(period)
             
         df = pd.DataFrame()
-        emafast = talib.EMA(data, short_period)
-        emaslow = talib.EMA(data, long_period)
+        emafast = data.ewm(span=short_period, min_periods=short_period).mean()
+        emaslow = data.ewm(span=long_period, min_periods=long_period).mean()
         df['macd'] = emafast - emaslow
-        df['macd_signal'] = talib.EMA(df['macd'], n_sign)
+        df['macd_signal'] =  df['macd'].ewm(span=n_sign, min_periods=n_sign).mean()
         df['macd_difference'] = df['macd'] - df['macd_signal']
         return df
     except Exception as exception:
@@ -764,45 +745,14 @@ def mass_index(high, low, short_period, long_period):
             check_period_type(period)
         check_inputs_length(high, low)
         amplitude = high - low
-        ema1 = talib.EMA(amplitude, short_period)
-        ema2 = talib.EMA(ema1, short_period)
+        ema1 = amplitude.ewm(span=short_period, min_periods=short_period).mean()
+        ema2 = ema1.ewm(span=short_period, min_periods=short_period).mean()
         mass = ema1 / ema2
         mass = mass.rolling(long_period, min_periods=0).sum()
         return mass
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
-
-
-def midpoint_over_period(data, period):
-    """Midpoint over period"""
-    try:
-        logger.info(
-            'Calculating Midpoint Over Period for period = {}'.format(period))
-        check_period_type(period)
-        
-        mop = talib.MIDPOINT(data, timeperiod=period)
-        return mop
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def midpoint_price_over_period(high, low, period):
-    """Midpoint price over period"""
-    try:
-        logger.info(
-            'Calculating Midpoint Price Over Period for period = {}'.format(
-                period))
-        check_period_type(period)
-            
-        check_inputs_length(high, low)
-        mpop = talib.MIDPRICE(high, low, timeperiod=period)
-        return mpop
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
 
 def minus_directional_indicator(high, low, close, period):
     """Minus Directional Indicator"""
@@ -838,22 +788,10 @@ def median_price(high, low):
     """Calculating Median Price"""
     try:
         logger.info("Calculating Median Price...")
-        mp_data = talib.MEDPRICE(high, low)
         check_inputs_length(high, low)
-        return mp_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def momentum(data, period):
-    """Momentum"""
-    try:
-        logger.info('Calculating Momentum for period = {}'.format(period))
-        check_period_type(period)
+        mp_data = (high+low)/2
         
-        momentum_data = talib.MOM(data, timeperiod=period)
-        return momentum_data
+        return mp_data
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -865,9 +803,8 @@ def ma(data, period, matype=0):
         logger.info(
             'Calculating Moving Average for period = {}'.format(period))
         check_period_type(period)
-        
-        ma_data = talib.MA(data, timeperiod=period, matype=matype)
-        return ma_data
+        ma_data = data.rolling(period).mean()
+        return pd.Series(ma_data,name="moving_average")
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -896,101 +833,28 @@ def negative_volume_index(data, volume):
         raise exception
 
 
-def hilbert_transform_inst_trendline(data):
-    """Hilbert Transform - Instantaneous Trendline"""
-    try:
-        logger.info(
-            'Calculating Hilbert Transform - Instantaneous Trendline...')
-        htit_data = talib.HT_TRENDLINE(data)
-        return htit_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def hilbert_transform_dom_cyc_per(data):
-    """Hilbert Transform - Dominant Cycle Period"""
-    try:
-        logger.info('Calculating Hilbert Transform - Dominant Cycle Period')
-        htdcp_data = talib.HT_DCPERIOD(data)
-        return htdcp_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def hilbert_transform_dom_cyc_phase(data):
-    """Hilbert Transform - Dominant Cycle Phase"""
-    try:
-        logger.info('Calculating Hilbert Transform - Dominant Cycle Phase')
-        htdcp_data = talib.HT_DCPHASE(data)
-        return htdcp_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def hilbert_transform_phasor_components(close):
-    """Hilbert Transform - Phasor Components"""
-    try:
-        logger.info("Calculating Hilbert Transform - Phasor Components...")
-        inphase_data, quadrature_data = talib.HT_PHASOR(close)
-        df = pd.DataFrame()
-        df['inphase'] = inphase_data
-        df['quadrature'] = quadrature_data
-        return df
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def hilbert_transform_sine_wave(data):
-    """Hilbert Transform - Sine Wave"""
-    try:
-        logger.info("Calculating Hilbert Transform - Sine Wave...")
-        sine_data, leadsine_data = talib.HT_SINE(data)
-        df = pd.DataFrame()
-        df['sine'] = sine_data
-        df['leadsine'] = leadsine_data
-        return df
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def hilbert_transform_trend_vs_cycle_mode(data):
-    """Hilbert Transform - Trend vs cycle mode"""
-    try:
-        logger.info("Calculating Hilbert Transform - Trend vs cycle mode...")
-        httc_data = talib.HT_TRENDMODE(data)
-        return httc_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
 
 def on_balance_volume(data, volume):
     """On Balance Volume"""
     try:
         logger.info("Calculating On Balance Volume... ")
         check_inputs_length(data, volume)
-        obv_data = talib.OBV(data, volume)
-        return obv_data
+        df = pd.DataFrame([data, volume]).transpose()
+        df['OBV'] = np.nan
+        c1 = data < data.shift(1)
+        c2 = data > data.shift(1)
+        if c1.any():
+            df.loc[c1, 'OBV'] = - volume
+        if c2.any():
+            df.loc[c2, 'OBV'] = volume
+        obv = df['OBV'].cumsum()
+        return pd.Series(obv, name='obv')
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def parabolic_sar(high, low, acceleration=0, maximum=0):
-    """Parabolic SAR"""
-    try:
-        logger.info('Calculating Parabolic SAR...')
-        check_inputs_length(high, low)
-        ps_data = talib.SAR(high, low, acceleration, maximum)
-        return ps_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
+
 
 
 def percentage_price_oscillator(data, short_period, long_period, matype=0):
@@ -1001,9 +865,10 @@ def percentage_price_oscillator(data, short_period, long_period, matype=0):
             .format(short_period, long_period))
         for period in (short_period, long_period):
             check_period_type(period)
-            
-        ppo_data = talib.PPO(data, short_period, long_period, matype)
-        return ppo_data
+        ema_short = data.ewm(span=short_period, min_periods=short_period).mean()
+        ema_long = data.ewm(span=long_period, min_periods=long_period).mean()
+        ppo = ((ema_short - ema_long) / ema_long) * 100
+        return pd.Series(ppo,name='ppo')
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -1039,20 +904,17 @@ def plus_directional_movement(high, low, close, period):
         raise exception
 
 
+
 def rate_of_change(data, period):
     """Rate of Change"""
     try:
         logger.info(
             "Calculating Rate of Change for period = {}".format(period))
         check_period_type(period)
-        
-        df = pd.DataFrame()
-        df['rate_of_change'] = talib.ROC(data, timeperiod=period)
-        df['rate_of_change_precentage'] = talib.ROCP(data, timeperiod=period)
-        df['rate_of_change_ratio'] = talib.ROCR(data, timeperiod=period)
-        df['rate_of_change_ratio_100_scale'] = talib.ROCR100(data,
-                                                             timeperiod=period)
-        return df
+        rocs = [((data[idx] - data[idx - (period - 1)]) /
+         data[idx - (period - 1)]) * 100 for idx in range(period - 1, len(data))]
+        rocs = fill_for_noncomputable_vals(data, rocs)
+        return pd.Series(rocs,name="rate_of_change",index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception

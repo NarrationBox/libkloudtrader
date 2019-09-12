@@ -1,4 +1,4 @@
-'''Various methods to help store, process, pipeline and manipulate your streams of data'''
+'''Various functions and classes to help store, process, pipeline and manipulate your streams of data'''
 
 from typing import Any
 from collections.abc import Sequence
