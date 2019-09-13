@@ -46,3 +46,7 @@ class AnalysisException(Exception):
 class InvlaidTimeInterval(Exception):
     """Exception raised if input interval for historical data apis is invalid"""
     pass
+
+class InvalidPricePoint(Exception):
+    """Exception raised if price point is invalid for backtesting"""
+    pass

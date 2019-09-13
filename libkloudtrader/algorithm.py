@@ -8,36 +8,20 @@ from libkloudtrader.exceptions import InvalidAlgorithmMode, EmptySymbolBucket, I
 from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
 from libkloudtrader.logs import start_logger
-import pybacktest
+import libkloudtrader.backtest as bt
 #pd.set_option('display.max_columns', None)  # or 1000
 #pd.set_option('display.max_rows', None)  # or 1000
 #pd.set_option('display.max_colwidth', -1)  # or 199
 
 logger = start_logger(__name__,ignore_module='libkloudtrader.analysis')
 
-
-def generate_positions_and_handle_portfolio(symbol, signals, data, commission,
-                                            initial_capital, quantity):
-    try:
-        initial_capital = float(initial_capital)
-        positions = pd.DataFrame(index=signals.index).fillna(0.0)
-        positions['Positions in' + " " +
-                  symbol] = (quantity * signals['signal']) + commission
-        portfolio = positions.multiply(data['close'], axis=0)
-        poss_diff = positions.diff()
-        portfolio['holdings'] = (positions.multiply(data['close'],
-                                                    axis=0)).sum(axis=1)
-        return portfolio
-    except Exception as exception:
-        raise exception
-
-
 def backtest(strategy: str,
              symbol_bucket: List[str],
              data: str,
              start_date: Any,
              end_date: Any,
-             preferred_benchmark: str,
+             preferred_price_point:str='close',
+             preferred_benchmark: str='SPY',
              data_interval: str = '1d',
              initial_capital: float = 100000,
              commission: float = 0):
@@ -52,16 +36,30 @@ def backtest(strategy: str,
                                              start_date,
                                              end_date,
                                              interval=data_interval)
-            ohlc = pybacktest.load_from_yahoo('SPY')
-            bt = pybacktest.Backtest(locals()['strategy'](data_batch), strategy.__name__)
-            print(bt.report)
-            '''
-            signals = locals()['strategy'](data_batch)
-            '''
+            for symbol in symbol_bucket:
+                a=bt.Backtest(locals()['strategy'](data_batch), preferred_price_point)
+                print(a.preferred_price_point)
+                '''
+                signals=locals()['strategy'](data_batch)
+                df=pd.DataFrame()
+                df['buy']=signals['buy']
+                df['sell']=signals['sell']
+                df['short']=signals['short']
+                df['cover']=signals['cover']
+                '''
+                #bt = Backtest(locals()['strategy'](data_batch), strategy.__name__)
+                #df=bt.signals
+                #df['positions']=bt.positions
+                #df['price']=bt.trades['price']
+                #df['trade volume']=bt.trades['vol']
+                #df['trade_price']=bt.trade_price
+                #df['equity']=bt.equity
+                #df['trades']=bt.trades
+                #df['positions in '+symbol]=100*df['positions']
+                #print(bt.trades)
+         
             logger.info("Received Signals from {}".format(strategy.__name__))
-            #portfolio=generate_positions_and_handle_portfolio(symbol,signals,data_batch,float(commission),initial_capital,quantity=100)
-            #print(portfolio)
-            #print(signals)
+
     except (KeyboardInterrupt, SystemExit):
         print('\n')
         logger.critical("User's keyboard prompt stopped {}".format(
@@ -121,3 +119,20 @@ def live_trade(strategy_name: str,
         )
         raise exception
         exit()
+
+'''
+def generate_positions_and_handle_portfolio(symbol, signals, data, commission,
+                                            initial_capital, quantity):
+    try:
+        initial_capital = float(initial_capital)
+        positions = pd.DataFrame(index=signals.index).fillna(0.0)
+        positions['Positions in' + " " +
+                  symbol] = (quantity * signals['signal']) + commission
+        portfolio = positions.multiply(data['close'], axis=0)
+        poss_diff = positions.diff()
+        portfolio['holdings'] = (positions.multiply(data['close'],
+                                                    axis=0)).sum(axis=1)
+        return portfolio
+    except Exception as exception:
+        raise exception
+'''
