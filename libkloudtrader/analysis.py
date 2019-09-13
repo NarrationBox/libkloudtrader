@@ -6,7 +6,6 @@ from typing import Any
 from six.moves import range
 import pandas as pd
 import numpy as np
-import talib
 import empyrical
 from libkloudtrader.logs import start_logger
 from libkloudtrader.exceptions import AnalysisException
@@ -67,10 +66,17 @@ def check_data_for_annual_trading_days(data: Any):
             "Data has more or less entries than one year should have. Please use returns() function to calculate returns for n number of days."
         )
 
+def smma(data, period):
+    """smoothed_moving_average"""
+    try:
+        series = pd.Series(data)
+        sma=series.ewm(alpha = 1.0/period).mean().values.flatten()
+        return pd.Series(sma,name='sma',index=data.index)
+    except Exception as exception:
+        raise exception
+
 
 """In Docs"""
-
-
 def accumulation_distribution_index(high, low, close, volume):
     """Accumulation/Distribution Index (ADI)"""
     try:
@@ -156,12 +162,13 @@ def money_flow_index(high, low, close, volume, period):
         raise exception
 
 
-def relative_strength_index(data, period):
+def relative_strength_index(data, period, ignore_log=False):
     """Relative Strength Index"""
     try:
-        logger.info(
-            'Calculating Relative Strength Index for peirod = {}'.format(
-                period))
+        if ignore_log!=True:
+            logger.info(
+                'Calculating Relative Strength Index for peirod = {}'.format(
+                    period))
         check_period_type(period)
         
         diff = data.diff(1)
@@ -208,99 +215,53 @@ def true_strength_index(data, high_period, low_period):
         raise exception
 
 
-def ultimate_oscillator(high, low, close, short_period, medium_period,
-                        long_period):
-    """Ultimate Oscillator"""
+def ultimate_oscillator(high, low, close, short_period=7, medium_period=14,
+                        long_period=28, ws=4.0, wm=2.0, wl=1.0):
+    """Ultimate Oscillator
+    BP = Close - Minimum(Low or Prior Close).
+    TR = Maximum(High or Prior Close)  -  Minimum(Low or Prior Close)
+    Average7 = (7-period BP Sum) / (7-period TR Sum)
+    Average14 = (14-period BP Sum) / (14-period TR Sum)
+    Average28 = (28-period BP Sum) / (28-period TR Sum)
+    UO = 100 x [(4 x Average7)+(2 x Average14)+Average28]/(4+2+1)
+    
+    """
     try:
         logger.info(
             'Calculating Ultimate Oscillator for short period = {}, medium period = {} and long period = {}'
             .format(short_period, medium_period, long_period))
         check_inputs_length(high, low, close)
-        uo_data = talib.ULTOSC(high,
-                               low,
-                               close,
-                               timeperiod1=short_period,
-                               timeperiod2=medium_period,
-                               timeperiod3=long_period)
-        return uo_data
+        min_l_or_pc = close.shift(1, fill_value=close.mean()).combine(low, min)
+        max_h_or_pc = close.shift(1, fill_value=close.mean()).combine(high, max)
+        bp = close - min_l_or_pc
+        tr = max_h_or_pc - min_l_or_pc
+        avg_s = bp.rolling(short_period, min_periods=0).sum() / tr.rolling(short_period, min_periods=0).sum()
+        avg_m = bp.rolling(medium_period, min_periods=0).sum() / tr.rolling(medium_period, min_periods=0).sum()
+        avg_l = bp.rolling(long_period, min_periods=0).sum() / tr.rolling(long_period, min_periods=0).sum()
+
+        uo = 100.0 * ((ws * avg_s) + (wm * avg_m) + (wl * avg_l)) / (ws + wm + wl)
+        return uo
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def absolute_price_oscillator(data, short_period, long_period, matype=0):
-    """Absolute Price Oscillator"""
-    try:
-        logger.info(
-            'Calculating Absolute Price Oscillator for Short period = {} and Long period = {}'
-            .format(short_period, long_period))
-        for period in (short_period, long_period):
-            check_period_type(period)
-            
-        apo_data = talib.APO(data, short_period, long_period, matype=matype)
-        return apo_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def aroon(high, low, period):
+def aroon(data, period):
     """Aroon"""
     try:
         check_period_type(period)
-        check_inputs_length(high, low)
+        check_for_period_error(data,period)
         logger.info('Calculating Aroon for period = {}'.format(period))
-        aroondown, aroonup = talib.AROON(high, low, timeperiod=period)
         df = pd.DataFrame()
-        df['aroondown'] = aroondown
-        df['aroonup'] = aroonup
-        df['aroon_oscillator'] = talib.AROONOSC(high, low, timeperiod=period)
+        df['aroonup'] = data.rolling(period, min_periods=0).apply(lambda x: float(np.argmin(x) + 1) / period * 100, raw=True)
+        df['aroondown'] = data.rolling(period, min_periods=0).apply(lambda x: float(np.argmax(x) + 1) / period* 100, raw=True)
         return df
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def average_directional_moving_index(high, low, close, period):
-    """Average Directional Movement Index"""
-    try:
-        logger.info(
-            'Calculating Average Directional Movement Index for period = {}'.
-            format(period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        admi_data = talib.ADX(high, low, close, timeperiod=period)
-        return admi_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
 
-
-def average_directional_moving_index_rating(high, low, close, period):
-    """Average Directional Movement Index Rating"""
-    try:
-        logger.info(
-            'Calculating Average Directional Movement Index Rating for period = {}'
-            .format(period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        admir_data = talib.ADXR(high, low, close, timeperiod=period)
-        return admir_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def average_price(open, high, low, close):
-    try:
-        """Average Price"""
-        logger.info("Calculating Average Price...")
-        check_inputs_length(high, low, close)
-        avgprice_data = talib.AVGPRICE(open, high, low, close)
-        return avgprice_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
 
 
 def average_true_range(high, low, close, period):
@@ -310,68 +271,56 @@ def average_true_range(high, low, close, period):
             "Calculating Average True Range for period = {}".format(period))
         check_period_type(period)
         check_inputs_length(high, low, close)
-        atr_data = talib.ATR(high, low, close, timeperiod=period)
-        return atr_data
+        cs = close.shift(1)
+        tr = high.combine(cs, max) - low.combine(cs, min)
+        atr = np.zeros(len(close))
+        atr[0] = tr[1::].mean()
+        for i in range(1, len(atr)):
+            atr[i] = (atr[i-1] * (period-1) + tr.iloc[i]) / float(period)
+        atr = pd.Series(data=atr, index=tr.index)
+        return atr
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
-
-def normalized_average_true_range(high, low, close, period):
+def upper_bollinger_band(data, period, std_mult=2.0):
+    '''upper bollinger band'''
     try:
-        """Normalized Average True Range"""
-        logger.info(
-            'Calculating Normalized Average True Range for period = {}'.format(
-                period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        natr_data = talib.NATR(high, low, close, timeperiod=period)
-        return natr_data
+        simple_ma=data.rolling(period).mean()[period-1:]
+        upper_bb = []
+        for idx in range(len(data) - period + 1):
+            std_dev = np.std(data[idx:idx + period])
+            upper_bb.append(simple_ma[idx] + std_dev * std_mult)
+        upper_bb = fill_for_noncomputable_vals(data, upper_bb)
+
+        return pd.Series(upper_bb,index=data.index)
     except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
-
-def true_range(high, low, close):
-    """True Range"""
+def lower_bollinger_band(data,period, std=2.0):
+    '''lower bollinger band'''
     try:
-        logger.info('Calculating True Range...')
-        check_inputs_length(high, low, close)
-        tr_data = talib.TRANGE(high, low, close)
-        return tr_data
+        simple_ma=data.rolling(period).mean()[period-1:]
+        lower_bb = []
+        for idx in range(len(data) - period + 1):
+            std_dev = np.std(data[idx:idx + period])
+            lower_bb.append(simple_ma[idx] - std_dev * std)
+        lower_bb = fill_for_noncomputable_vals(data, lower_bb)
+        return pd.Series(lower_bb,index=data.index)
     except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
-
-def balance_of_power(open, high, low, close):
-    """Balance of Power"""
-    try:
-        logger.info("Calculating balance of Power...")
-        check_inputs_length(open, high, low, close)
-        bop_data = talib.BOP(open, high, low, close)
-        return bop_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def bollinger_bands(data, period=20, nbdevup=2, nbdevdn=2, matype=0):
+def bollinger_bands(data, period=20, std=2.0):
     """Bollinger Bands"""
     try:
         logger.info(
             'Calculating Bollinger Bands for period = {}'.format(period))
         check_period_type(period)
-        
-        upperband, middleband, lowerband = talib.BBANDS(data,
-                                                        timeperiod=period,
-                                                        nbdevup=nbdevup,
-                                                        nbdevdn=nbdevdn,
-                                                        matype=matype)
+        check_for_period_error(data, period)
         df = pd.DataFrame()
-        df['upperband'] = upperband
-        df['middleband'] = middleband
-        df['lowerband'] = lowerband
+        df['upperband'] = upper_bollinger_band(data, period)
+        df['middleband'] = data.rolling(period).mean()
+        df['lowerband'] = lower_bollinger_band(data,period)
         return df
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -405,14 +354,13 @@ def chande_momentum_oscillator(data, period):
                 period))
         check_period_type(period)
         
-        cmo_data = talib.CMO(data, timeperiod=period)
-        return cmo_data
+        
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def commodity_channel_index(high, low, close, period):
+def commodity_channel_index(high, low, close,period,c=0.015):
     """Commodity Channel Index"""
     try:
         logger.info(
@@ -420,26 +368,13 @@ def commodity_channel_index(high, low, close, period):
                 period))
         check_period_type(period)
         check_inputs_length(high, low, close)
-        cci_data = talib.CCI(high, low, close, timeperiod=period)
-        return cci_data
+        pp = (high + low + close) / 3.0
+        cci = (pp - pp.rolling(period, min_periods=0).mean()) / (c * pp.rolling(period, min_periods=0).std())
+        return cci
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
-
-def correlation_coefficient(high, low, period):
-    """Correlation Coefficient"""
-    try:
-        logger.info(
-            "Calculating Correlation Coefficient for period = {}".format(
-                period))
-        check_period_type(period)
-        check_inputs_length(high, low)
-        cor_co_data = talib.CORREL(high, low, timeperiod=period)
-        return cor_co_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
 
 
 def cumulative_returns(daily_returns):
@@ -488,21 +423,6 @@ def detrended_price_oscillator(data, period):
                          fill_value=data.mean()) - data.rolling(
                              period, min_periods=0).mean()
         return dpo
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def directional_movement_index(high, low, close, period):
-    """Directional Movement Index"""
-    try:
-        logger.info(
-            "Calculating Directional Movement Index for period = {}".format(
-                period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        dmo_data = talib.DX(high, low, close, timeperiod=period)
-        return dmo_data
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -754,34 +674,7 @@ def mass_index(high, low, short_period, long_period):
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
-def minus_directional_indicator(high, low, close, period):
-    """Minus Directional Indicator"""
-    try:
-        logger.info(
-            'Calculating Minus Directional Indicator for period = {}'.format(
-                period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        mdi_data = talib.MINUS_DI(high, low, close, timeperiod=period)
-        return mdi_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
 
-
-def minus_directional_movement(high, low, close, period):
-    """Minus Directional Movement"""
-    try:
-        logger.info(
-            'Calculating Minus Directional Movement for period = {}'.format(
-                period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        mdm_data = talib.MINUS_DM(high, low, timeperiod=period)
-        return mdm_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
 
 
 def median_price(high, low):
@@ -874,36 +767,6 @@ def percentage_price_oscillator(data, short_period, long_period, matype=0):
         raise exception
 
 
-def plus_directional_indicator(high, low, close, period):
-    """Plus Directional Indicator"""
-    try:
-        logger.info(
-            'Calcluating Plus Directional Indicator for period = {}'.format(
-                period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        pdi_data = talib.PLUS_DI(high, low, close, timeperiod=period)
-        return pdi_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def plus_directional_movement(high, low, close, period):
-    """Plus Directional Movement"""
-    try:
-        logger.info(
-            'Calcluating Plus Directional Movement for period = {}'.format(
-                period))
-        check_period_type(period)
-        check_inputs_length(high, low, close)
-        pdm_data = talib.PLUS_DM(high, low, timeperiod=period)
-        return pdm_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
 
 def rate_of_change(data, period):
     """Rate of Change"""
@@ -917,15 +780,6 @@ def rate_of_change(data, period):
         return pd.Series(rocs,name="rate_of_change",index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-#SMA
-def sma(close, period):
-    try:
-        sma_data = talib.SMA(close, timeperiod=period)
-        return sma_data
-    except Exception as exception:
         raise exception
 
 
@@ -950,39 +804,18 @@ def moving_standard_deviation(data, period):
     logger.error('Oops! An error Occurred ⚠️')
 
 
-def stochastic_rsi(data,
-                   period,
-                   fast_period1=5,
-                   fast_period2=3,
-                   fastd_matype=0):
+def stochastic_rsi(data,period):
     """Stochastic RSI"""
     try:
         logger.info(
-            'Calculating Stochastic RSI for period = {}, fast_period1 = {}, fast_period2 = {}'
-            .format(period, fast_period1, fast_period2))
-        for a in (period, fast_period1, fast_period2):
-            check_period_type(a)
-            check_for_period_error(data, a)
-        fastk_data, fastd_data = talib.STOCHRSI(data, period, fast_period1,
-                                                fast_period2, fastd_matype)
-        df = pd.DataFrame()
-        df['fast_period1'] = fastk_data
-        df['fast_period2'] = fastd_data
-        return df
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
-def time_series_forecast(data, period):
-    """Time Series Forecast"""
-    try:
-        logger.info(
-            'Calculating Time Series Forecast for period = {}'.format(period))
+            'Calculating Stochastic RSI for period = {}'
+            .format(period))
         check_period_type(period)
-        
-        tsf_data = talib.TSF(data, timeperiod=period)
-        return tsf_data
+        check_for_period_error(data, period)
+        rsi = relative_strength_index(data, period, ignore_log=True)[period:]
+        stochrsi = [100 * ((rsi[idx] - np.min(rsi[idx+1-period:idx+1])) / (np.max(rsi[idx+1-period:idx+1]) - np.min(rsi[idx+1-period:idx+1]))) for idx in range(period-1, len(rsi))]
+        stochrsi = fill_for_noncomputable_vals(data, stochrsi)
+        return pd.Series(stochrsi,name="stochrsi",index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -992,10 +825,15 @@ def trix(data, period):
     """TRIX"""
     try:
         logger.info('Calculating Trix for period = {}'.format(period))
-        trix_data = talib.TRIX(data, timeperiod=period)
+       
         check_period_type(period)
         
-        return trix_data
+        ema1=data.ewm(span=period, min_periods=period).mean()
+        ema2=ema1.ewm(span=period, min_periods=period).mean()
+        ema3=ema2.ewm(span=period, min_periods=period).mean()
+        trix = (ema3 - ema3.shift(1, fill_value=ema3.mean())) / ema3.shift(1, fill_value=ema3.mean())
+        trix *= 100
+        return pd.Series(trix, name='trix',index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -1009,8 +847,9 @@ def triangular_ma(data, period):
                 period))
         check_period_type(period)
         
-        tma_data = talib.TRIMA(data, timeperiod=period)
-        return tma_data
+        ma1=data.rolling(period).mean()
+        tma=ma1.rolling(period).mean()
+        return pd.Series(tma,name='tma',index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -1023,9 +862,11 @@ def triple_ema(data, period):
             "Calculating Triple Exponential Moving Average for period = {}".
             format(period))
         check_period_type(period)
-        
-        tema_data = talib.TEMA(data, timeperiod=period)
-        return tema_data
+        ema1=data.ewm(span=period, min_periods=period).mean()
+        ema2=ema1.ewm(span=period, min_periods=period).mean()
+        ema3=ema2.ewm(span=period, min_periods=period).mean()
+        tema = (3*ema1) - (3*ema2) + ema3
+        return pd.Series(tema, name="tema", index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -1036,8 +877,8 @@ def typical_price(high, low, close):
     try:
         logger.info('Calculating Typical Price...')
         check_inputs_length(high, low, close)
-        tp_data = talib.TYPPRICE(high, low, close)
-        return tp_data
+        tp_data = [(high[idx] + low[idx] + close[idx]) / 3 for idx in range(0, len(close))]
+        return pd.Series(tp_data,name="typical_price",index=close.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -1054,11 +895,14 @@ def variance(data: Any):
         raise exception
 
 
-#variance
-def moving_variance(data, period, nbdev=1):
+def moving_variance(data, period):
+    """Moving variance"""
     try:
-        var_data = talib.VAR(data, timeperiod=period, nbdev=nbdev)
-        return var_data
+        logger.info('Calculating Moving Variance for period = {}...'.format(period))
+        check_period_type(period)
+        check_for_period_error(data, period)
+        var_data = data.rolling(period).var()
+        return pd.Series(var_data,name="moving_variance",index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -1092,24 +936,14 @@ def vortex_indicator(high: Any, low: Any, close: Any, period: int):
         raise exception
 
 
-def weighted_close_price(high, low, close):
-    """Weighted Close Price"""
-    try:
-        logger.info("Calculating Weighted Close Price...")
-        check_inputs_length(high, low, close)
-        wcp_data = talib.WCLPRICE(high, low, close)
-        return wcp_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
-
-
 def williams_r(high, low, close, period):
     """Williams' %R"""
     try:
         logger.info("Calculating Williams' %R for period = {}")
-        wr_data = talib.WILLR(high, low, close, timeperiod=period)
-        return wr_data
+        hh = high.rolling(period, min_periods=0).max()  # highest high over lookback period lbp
+        ll = low.rolling(period, min_periods=0).min()  # lowest low over lookback period lbp
+        wr = -100 * (hh - close) / (hh - ll)
+        return pd.Series(wr, index=close.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -1123,21 +957,18 @@ def wma(data, period):
                 period))
         check_period_type(period)
         
-        wma_data = talib.WMA(data, timeperiod=period)
-        return wma_data
+        k = (period * (period + 1)) / 2.0
+        wmas = []
+        for idx in range(0, len(data)-period+1):
+            product = [data[idx + period_idx] * (period_idx + 1) for period_idx in range(0, period)]
+            wma = sum(product) / k
+            wmas.append(wma)
+        wmas = fill_for_noncomputable_vals(data, wmas)
+        return pd.Series(wmas,index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
-
-#Two Crows
-def two_crows(open, high, low, close):
-    try:
-        tc_data = talib.CDL2CROWS(open, high, low, close)
-        return tc_data
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
 
 
 def annual_return(data):
@@ -1217,33 +1048,6 @@ def moving_volatility(daily_returns, period):
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
-
-def chaikin_oscillator(high,
-                       low,
-                       close,
-                       volume,
-                       short_period=3,
-                       long_period=10):
-    """Chaiking oscillator"""
-    try:
-        logger.info(
-            'Calculating Chaikin Oscillator for short period = {} and long period = {}'
-            .format(short_period, long_period))
-        check_inputs_length(high, low, close, volume)
-        for period in (short_period, long_period):
-            check_period_type(period)
-        df = pd.DataFrame()
-        df['chaikin_ad_line'] = talib.AD(high, low, close, volume)
-        df['chaikin_oscillator'] = talib.ADOSC(high,
-                                               low,
-                                               close,
-                                               volume,
-                                               fastperiod=short_period,
-                                               slowperiod=long_period)
-        return df
-    except Exception as exception:
-        logger.error('Oops! An error Occurred ⚠️')
-        raise exception
 
 
 def coppock_curve(data, period):

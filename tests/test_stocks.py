@@ -276,13 +276,14 @@ class TestStreamLiveSummary:
 
 
 class TestListOfCompanies:
+    '''
     def test_return_type(self):
         """Test return Type"""
         list_of_exchanges=['all','nyse','nasdaq','amex']
         for x in list_of_exchanges:
             data=stocks.list_of_companies(x)
             assert isinstance(data,pandas.DataFrame)
-        
+    '''   
     def test_data(self):
         """Test columns in the returned dataframe"""
         pass
