@@ -15,6 +15,8 @@ setup(
         "boto3",
         "pandas",
         "numpy",
-        "empyrical"
+        "empyrical",
+        "asyncio",
+        "ccxt @ git+ssh://git@github.com/kloudtrader/kloudtrader_ccxt#egg=ccxt"
     ],
 )

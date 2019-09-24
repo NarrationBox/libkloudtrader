@@ -1,7 +1,6 @@
 import libkloudtrader.crypto as crypto
 import pandas
 
-CRYPTO_EXCHANGE=crypto.CRYPTO_EXCHANGE
 
 class Test_list_of_exchanges:
     def test_return_type(self):
@@ -75,10 +74,7 @@ class Test_ohlcv:
         data2=crypto.ohlcv(symbol='BTC/USD',start="2019-01-01 17:30:00",end="2019-01-01 17:35:00",interval='1m')
         assert isinstance(data,pandas.DataFrame) and isinstance(data2,pandas.DataFrame)
 
-    def test_invalid_interval(self):
-        '''test invalid interval'''
-        data=crypto.ohlcv(symbol='BTC/USD',start="2019-01-01 15:30:00",end="2019-01-01 17:35:00",interval='134m')
-        assert data=="Invalid Time Interval"
+
     
     def test_invalid_date(self):
         pass
@@ -127,7 +123,7 @@ class Test_currencies:
         data=crypto.currencies(exchange="kraken")
         assert isinstance(data,dict) and not 'message' in data
         
-
+"""
 class Test_user_balance:
     def test_return_type(self):
         '''test return type'''
@@ -160,7 +156,7 @@ class Test_user_closed_orders:
         '''test returned data'''
         data=crypto.user_closed_orders('BTC/USD',test_mode=True)
         assert 'id','info' in data[0]
-"""
+
 class Test_get_order:
     def test_return_type(self):
         '''test return type'''
@@ -171,7 +167,7 @@ class Test_get_order:
         '''test returned data'''
         data=crypto.get_order(order_id="55d7e42e-3a6c-41f7-a692-9bdcd23dce70",symbol='BTC/USD',test_mode=True)
         assert 'id','info' in data
-"""
+
 class Test_user_orders:
     def test_return_type(self):
         '''test return type'''
@@ -200,3 +196,4 @@ class Test_user_transactions:
         '''test return type'''
         data=crypto.user_transactions('USD',test_mode=True)
         assert isinstance(data,list) and not 'message' in data
+"""

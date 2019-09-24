@@ -1,7 +1,6 @@
 # coding: utf8
 
 # part of pybacktest package: https://github.com/ematvey/pybacktest
-
 """ Essential functions for translating signals into trades.
 Usable both in backtesting and production.
 """
@@ -9,7 +8,8 @@ Usable both in backtesting and production.
 import pandas
 
 
-def signals_to_positions(signals, init_pos=0,
+def signals_to_positions(signals,
+                         init_pos=0,
                          mask=('Buy', 'Sell', 'Short', 'Cover')):
     """
     Translate signal dataframe into positions series (trade prices aren't
@@ -41,7 +41,6 @@ def trades_to_equity(trd):
     """
     Convert trades dataframe (cols [vol, price, pos]) to equity diff series
     """
-
     def _cmp_fn(x):
         if x > 0:
             return 1
@@ -52,7 +51,7 @@ def trades_to_equity(trd):
 
     psig = trd.pos.apply(_cmp_fn)
     closepoint = psig != psig.shift()
-    
+
     e = (trd.vol * trd.price).cumsum()[closepoint] - \
         (trd.pos * trd.price)[closepoint]
 

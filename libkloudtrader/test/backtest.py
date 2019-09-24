@@ -1,12 +1,9 @@
-
-
 import time
 
 from cached_property import cached_property
 import libkloudtrader.performance as performance
 import libkloudtrader.parts as parts
 import pandas
-
 
 __all__ = ['Backtest']
 
@@ -28,8 +25,8 @@ class StatEngine(object):
             except:
                 return
         else:
-            raise IndexError(
-                "Calculation of '%s' statistic is not supported" % attr)
+            raise IndexError("Calculation of '%s' statistic is not supported" %
+                             attr)
 
 
 class ContextWrapper(object):
@@ -45,11 +42,13 @@ class Backtest(object):
     Attempts to be as smart as possible.
     """
 
-    _data_possible_fields = ('ohlc', 'bars', 'ohlcv','data')
+    _data_possible_fields = ('ohlc', 'bars', 'ohlcv', 'data')
     _sig_mask_int = ('Buy', 'Sell', 'Short', 'Cover')
     _pr_mask_int = ('BuyPrice', 'SellPrice', 'ShortPrice', 'CoverPrice')
 
-    def __init__(self, dataobj, name='Unknown',
+    def __init__(self,
+                 dataobj,
+                 name='Unknown',
                  signal_fields=('buy', 'sell', 'short', 'cover'),
                  price_fields=('buyprice', 'sellprice', 'shortprice',
                                'coverprice')):
@@ -158,23 +157,26 @@ class Backtest(object):
         print('-' * len(s))
         print(s)
         print('-' * len(s) + '\n')
-        print(yaml.dump(self.report, allow_unicode=True, default_flow_style=False))
+        print(
+            yaml.dump(self.report,
+                      allow_unicode=True,
+                      default_flow_style=False))
         print('-' * len(s))
 
     def plot_equity(self, subset=None, ax=None):
         import matplotlib.pylab as pylab
         _ = None
         if ax is None:
-            _,ax = pylab.subplots()
-        
+            _, ax = pylab.subplots()
+
         if subset is None:
             subset = slice(None, None)
         assert isinstance(subset, slice)
         eq = self.equity[subset].cumsum()
-        
+
         eq = self.equity.ix[subset].cumsum()
         ix = eq.index
-        eq.plot(color='red', style='-',ax=ax)
+        eq.plot(color='red', style='-', ax=ax)
 
         #eq.plot(color='red', label='strategy',ax=ax)
         #ix = self.ohlc.ix[eq.index[0]:eq.index[-1]].index
@@ -185,7 +187,7 @@ class Backtest(object):
         ax.legend(loc='best')
         ax.set_title(str(self))
         ax.set_ylabel('Equity for %s' % subset)
-        return _,ax
+        return _, ax
 
     def plot_trades(self, subset=None, ax=None):
         if subset is None:
@@ -199,17 +201,33 @@ class Backtest(object):
         import matplotlib.pylab as pylab
         _ = None
         if ax is None:
-            _,ax = pylab.subplots()
+            _, ax = pylab.subplots()
 
-        ax.plot(le.index, le.values, '^', color='lime', markersize=12,
-                   label='long enter')
-        ax.plot(se.index, se.values, 'v', color='red', markersize=12,
-                   label='short enter')
-        ax.plot(lx.index, lx.values, 'o', color='lime', markersize=7,
-                   label='long exit')
-        ax.plot(sx.index, sx.values, 'o', color='red', markersize=7,
-                   label='short exit')
-        
+        ax.plot(le.index,
+                le.values,
+                '^',
+                color='lime',
+                markersize=12,
+                label='long enter')
+        ax.plot(se.index,
+                se.values,
+                'v',
+                color='red',
+                markersize=12,
+                label='short enter')
+        ax.plot(lx.index,
+                lx.values,
+                'o',
+                color='lime',
+                markersize=7,
+                label='long exit')
+        ax.plot(sx.index,
+                sx.values,
+                'o',
+                color='red',
+                markersize=7,
+                label='short exit')
+
         self.data.open.ix[subset].plot(color='black', label='price', ax=ax)
         ax.set_ylabel('Trades for %s' % subset)
-        return _,ax
+        return _, ax

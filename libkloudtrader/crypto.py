@@ -4,8 +4,10 @@ import os
 from typing import Any
 import datetime
 import pandas
-from .exceptions import BadRequest, InvalidCredentials
-from .logs import start_logger
+import asyncio
+from libkloudtrader.exceptions import BadRequest, InvalidCredentials
+from libkloudtrader.logs import start_logger
+from libkloudtrader.crypto_operations import *
 """Config starts"""
 
 logger = start_logger(__name__)
@@ -36,17 +38,7 @@ def crypto_get_headers(api_key, api_secret, exchange_password, exchange_uid):
 def list_of_exchanges(test_mode: bool = False) -> list:
     """Get List of Exchanges available"""
     try:
-        if test_mode:
-            url = CRYPTO_URL_TEST
-        else:
-            url = CRYPTO_URL_LIVE
-        response = requests.get('{}/list_of_exchanges'.format(url))
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            raise InvalidCredentials(response.text)
+        return ListOfExchanges(test_mode=test_mode)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -55,17 +47,8 @@ def list_of_exchanges(test_mode: bool = False) -> list:
 def exchange_structure(exchange: str = CRYPTO_EXCHANGE) -> dict:
     """No Docs needed. Get the structure of an exchange"""
     try:
-        url = CRYPTO_URL_LIVE
-        response = requests.get('{}/exchange_structure/{}'.format(
-            url, exchange))
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return ExchangeStructure(exchange=exchange)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -75,95 +58,62 @@ def exchange_attribute(attribute: str,
                        exchange: str = CRYPTO_EXCHANGE) -> dict:
     """No Docs needed. Return asked attribute of the given exchange"""
     try:
-        url = CRYPTO_URL_LIVE
-        response = requests.get('{}/exchange_attribute/{}/{}'.format(
-            url, exchange, attribute))
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return ExchangeAttribute(attribute=attribute, exchange=exchange)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def markets(exchange: str = CRYPTO_EXCHANGE) -> dict:
+def markets(exchange: str = CRYPTO_EXCHANGE, rate_limit: bool = True) -> dict:
     """Get all the markets available in the exchange and their market structures"""
     try:
-        url = CRYPTO_URL_LIVE
-        response = requests.get('{}/markets/{}'.format(url, exchange))
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            ExchangeMarkets(exchange=exchange, rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def market_structure(symbol: str, exchange: str = CRYPTO_EXCHANGE) -> dict:
+def market_structure(symbol: str,
+                     exchange: str = CRYPTO_EXCHANGE,
+                     rate_limit: bool = True) -> dict:
     """Get the market structure of a particular symbol"""
     try:
-        url = CRYPTO_URL_LIVE
-        payload = {'symbol': symbol.upper()}
-        response = requests.post('{}/symbol_market_structure/{}'.format(
-            url, exchange),
-                                 json=payload)
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            MarketStructure(symbol=symbol,
+                            exchange=exchange,
+                            rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def latest_price_info(symbol: str, exchange: str = CRYPTO_EXCHANGE) -> dict:
+def latest_price_info(symbol: str,
+                      exchange: str = CRYPTO_EXCHANGE,
+                      rate_limit: bool = True) -> dict:
     """Get quotes/ticker data for a given symbool from the given exchange"""
     try:
-        url = CRYPTO_URL_LIVE
-        payload = {'symbol': symbol.upper()}
-        response = requests.post('{}/quotes/{}'.format(url, exchange),
-                                 json=payload)
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            latestPriceInfo(symbol=symbol,
+                            exchange=exchange,
+                            rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def latest_price_info_for_all_symbols(exchange: str = CRYPTO_EXCHANGE) -> dict:
+def latest_price_info_for_all_symbols(exchange: str = CRYPTO_EXCHANGE,
+                                      rate_limit: bool = True) -> dict:
     """Get quotes/ticker data for all symbols listed on an exchange"""
     try:
-        url = CRYPTO_URL_LIVE
-        response = requests.get('{}/quotes_for_all_symbols/{}'.format(
-            url, exchange))
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            latestPriceInfoForAllSymbols(exchange=exchange,
+                                         rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -174,7 +124,8 @@ def ohlcv(symbol: str,
           end: Any,
           interval: str = "1d",
           exchange: str = CRYPTO_EXCHANGE,
-          dataframe: bool = True) -> dict:
+          dataframe: bool = True,
+          rate_limit: bool = True) -> dict:
     """Get OHLCV/bar data. 
     Most exchanges don't go very back in time. 
     The very few that go need pagination which will be released soon. 
@@ -183,59 +134,90 @@ def ohlcv(symbol: str,
     %Y-%m-%d date format for "1d","1w","1M" and %Y-%m-%d %H:%M:%S for others
     """
     try:
-        if interval not in ["1m", "5m", "15m", "30m", "1h", "1d", "1w", "1M"]:
-            return "Invalid Time Interval"
-        url = CRYPTO_URL_LIVE
-
-        payload = {
-            'symbol': symbol.upper(),  #required
-            'timeframe': interval,  #required
-            'start': start,
-            'end': end
-        }
-        response = requests.post('{}/OHLCV/{}'.format(url, exchange),
-                                 json=payload)
-        if response:
-            if dataframe == True:
-                columns = ['time', 'open', 'high', 'low', 'close', 'volume']
-                data = response.json()
-                dataframe = pandas.DataFrame(data, columns=columns)
-                dataframe['date'] = pandas.to_datetime(dataframe['time'])
-                dataframe.set_index(['date'], inplace=True)
-                return dataframe
-            else:
-                return response.json()
-        if response.status_code == 400:
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            getOHLCV(symbol=symbol,
+                     start=start,
+                     end=end,
+                     interval=interval,
+                     exchange=exchange,
+                     dataframe=dataframe,
+                     rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
 def latest_trades(symbol: str,
-                  number_of_data_points: int = 0,
-                  exchange: str = CRYPTO_EXCHANGE):
+                  number_of_data_points: int = 1,
+                  exchange: str = CRYPTO_EXCHANGE,
+                  rate_limit: bool = True):
     """Get recent trades for a particular trading symbol."""
     try:
-        url = CRYPTO_URL_LIVE
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            latestTrades(symbol=symbol,
+                         number_of_data_points=number_of_data_points,
+                         exchange=exchange,
+                         rate_limit=rate_limit))
+    except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise exception
 
-        payload = {
-            'symbol': symbol.upper(),
-            'limit': number_of_data_points,
-        }
-        response = requests.post('{}/trades/{}'.format(url, exchange),
-                                 json=payload)
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+
+def latest_order_book_entry(symbol: str,
+                            exchange: str = CRYPTO_EXCHANGE,
+                            rate_limit: bool = True):
+    """Get latest orderbook entry for a particular market trading symbol."""
+    try:
+        check_exchange_existence(exchange=exchange)
+        response = asyncio.get_event_loop().run_until_complete(
+            getLatestEntryOrderBook(symbol=symbol,
+                                    number_of_data_points=1,
+                                    exchange=exchange,
+                                    rate_limit=rate_limit))
+        latest_orderbook_entry_dict = {}
+        latest_orderbook_entry_dict['symbol'] = symbol
+        latest_orderbook_entry_dict['ask'] = response['asks'][0][0] if len(
+            response['asks']) > 0 else None
+        latest_orderbook_entry_dict['asksize'] = response['asks'][0][1] if len(
+            response['asks']) > 0 else None
+        latest_orderbook_entry_dict['bid'] = response['bids'][0][0] if len(
+            response['bids']) > 0 else None
+        latest_orderbook_entry_dict['bidsize'] = response['bids'][0][1] if len(
+            response['bids']) > 0 else None
+        latest_orderbook_entry_dict['datetime'] = response['datetime']
+        latest_orderbook_entry_dict['nonce'] = response['nonce']
+        return latest_orderbook_entry_dict
+    except Exception as exception:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise exception
+
+
+def latest_L2_order_book_entry(symbol: str,
+                               exchange: str = CRYPTO_EXCHANGE,
+                               rate_limit: bool = True):
+    """Get latest orderbook entry for a particular market trading symbol."""
+    try:
+        check_exchange_existence(exchange=exchange)
+        response = asyncio.get_event_loop().run_until_complete(
+            getLatestEntryOrderBookL2(symbol=symbol,
+                                      number_of_data_points=1,
+                                      exchange=exchange,
+                                      rate_limit=rate_limit))
+        latest_orderbook_entry_dict = {}
+        latest_orderbook_entry_dict['symbol'] = symbol
+        latest_orderbook_entry_dict['ask'] = response['asks'][0][0] if len(
+            response['asks']) > 0 else None
+        latest_orderbook_entry_dict['asksize'] = response['asks'][0][1] if len(
+            response['asks']) > 0 else None
+        latest_orderbook_entry_dict['bid'] = response['bids'][0][0] if len(
+            response['bids']) > 0 else None
+        latest_orderbook_entry_dict['bidsize'] = response['bids'][0][1] if len(
+            response['bids']) > 0 else None
+        latest_orderbook_entry_dict['datetime'] = response['datetime']
+        latest_orderbook_entry_dict['nonce'] = response['nonce']
+        return latest_orderbook_entry_dict
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -243,44 +225,17 @@ def latest_trades(symbol: str,
 
 def order_book(symbol: str,
                number_of_data_points: int = 1,
-               exchange: str = CRYPTO_EXCHANGE):
-    """Get L2/L3 orderbook for a particular market trading symbol."""
-    """Example:
-    orderbook=order_book(symbol='BTC/USD',exchange='bitmex') 
-    bid = orderbook['bids'][0][0] if len (orderbook['bids']) > 0 else None
-    ask = orderbook['asks'][0][0] if len (orderbook['asks']) > 0 else None
-    spread = (ask - bid) if (bid and ask) else None
-    print('market price', { 'bid': bid, 'ask': ask, 'spread': spread })
-    """
+               exchange: str = CRYPTO_EXCHANGE,
+               rate_limit: bool = True):
+    """Get order book for a particular symbol."""
     try:
-        url = CRYPTO_URL_LIVE
-        payload = {
-            'symbol': symbol.upper(),
-            'limit': number_of_data_points,
-        }
-        response = requests.post('{}/order_book/{}'.format(url, exchange),
-                                 json=payload)
-        if response:
-            latest_orderbook_entry_dict = {}
-            latest_orderbook_entry_dict['symbol'] = symbol
-            latest_orderbook_entry_dict['ask'] = response.json(
-            )['asks'][0][0] if len(response.json()['asks']) > 0 else None
-            latest_orderbook_entry_dict['asksize'] = response.json(
-            )['asks'][0][1] if len(response.json()['asks']) > 0 else None
-            latest_orderbook_entry_dict['bid'] = response.json(
-            )['bids'][0][0] if len(response.json()['bids']) > 0 else None
-            latest_orderbook_entry_dict['bidsize'] = response.json(
-            )['bids'][0][1] if len(response.json()['bids']) > 0 else None
-            latest_orderbook_entry_dict['datetime'] = response.json(
-            )['datetime']
-            latest_orderbook_entry_dict['nonce'] = response.json()['nonce']
-            return latest_orderbook_entry_dict
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            getLatestEntryOrderBook(
+                symbol=symbol,
+                number_of_data_points=number_of_data_points,
+                exchange=exchange,
+                rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -288,55 +243,29 @@ def order_book(symbol: str,
 
 def L2_order_book(symbol: str,
                   number_of_data_points: int = 1,
-                  exchange: str = CRYPTO_EXCHANGE):
+                  exchange: str = CRYPTO_EXCHANGE,
+                  rate_limit: bool = True):
     """Level 2 (price-aggregated) order book for a particular symbol."""
     try:
-        url = CRYPTO_URL_LIVE
-        payload = {
-            'symbol': symbol.upper(),
-            'limit': number_of_data_points,
-        }
-        response = requests.post('{}/L2_order_book/{}'.format(url, exchange),
-                                 json=payload)
-        if response:
-            latest_orderbook_entry_dict = {}
-            latest_orderbook_entry_dict['symbol'] = symbol
-            latest_orderbook_entry_dict['ask'] = response.json(
-            )['asks'][0][0] if len(response.json()['asks']) > 0 else None
-            latest_orderbook_entry_dict['asksize'] = response.json(
-            )['asks'][0][1] if len(response.json()['asks']) > 0 else None
-            latest_orderbook_entry_dict['bid'] = response.json(
-            )['bids'][0][0] if len(response.json()['bids']) > 0 else None
-            latest_orderbook_entry_dict['bidsize'] = response.json(
-            )['bids'][0][1] if len(response.json()['bids']) > 0 else None
-            latest_orderbook_entry_dict['datetime'] = response.json(
-            )['datetime']
-            latest_orderbook_entry_dict['nonce'] = response.json()['nonce']
-            return latest_orderbook_entry_dict
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            getLatestEntryOrderBookL2(
+                symbol=symbol,
+                number_of_data_points=number_of_data_points,
+                exchange=exchange,
+                rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def currencies(exchange: str = CRYPTO_EXCHANGE):
+def currencies(exchange: str = CRYPTO_EXCHANGE,
+               rate_limit: bool = True) -> dict:
     """Get all Currencies available on an exchange"""
     try:
-        url = CRYPTO_URL_LIVE
-        response = requests.get('{}/currencies/{}'.format(url, exchange))
-        if response:
-            return response.json()
-        if response.status_code == 400:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise BadRequest(response.text)
-        if response.status_code == 401:
-            logger.error('Oops! An error Occurred ⚠️')
-            raise InvalidCredentials(response.text)
+        check_exchange_existence(exchange=exchange)
+        return asyncio.get_event_loop().run_until_complete(
+            getCurrencies(exchange=exchange, rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception

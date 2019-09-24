@@ -1,6 +1,4 @@
 '''archive'''
-
-
 '''
 def hilbert_transform_inst_trendline(data):
     """Hilbert Transform - Instantaneous Trendline"""
@@ -301,7 +299,7 @@ def negative_directional_movement(high, low):
     return ndm
 
 def positive_directional_index(high, low, close, period, ignore_log=False):
-    '''positive directional index'''  
+    """positive directional index""" 
     try:
         if ignore_log!=True:
             logger.info("Calculating Positive Directional Index for period = {}".format(period))
@@ -317,7 +315,7 @@ def positive_directional_index(high, low, close, period, ignore_log=False):
 
 def negative_directional_index(high, low, close, period,ignore_log=False):
     try:
-        '''negative directional index'''
+        """negative directional index"""
         if ignore_log!=True:
             logger.info("Calculating Negative Directional Index for period = {}".format(period))
         ndi = (100 *

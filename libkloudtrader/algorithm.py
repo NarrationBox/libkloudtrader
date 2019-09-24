@@ -13,15 +13,16 @@ import libkloudtrader.backtest as bt
 #pd.set_option('display.max_rows', None)  # or 1000
 #pd.set_option('display.max_colwidth', -1)  # or 199
 
-logger = start_logger(__name__,ignore_module='libkloudtrader.analysis')
+logger = start_logger(__name__, ignore_module='libkloudtrader.analysis')
+
 
 def backtest(strategy: str,
              symbol_bucket: List[str],
              data: str,
              start_date: Any,
              end_date: Any,
-             preferred_price_point:str='close',
-             preferred_benchmark: str='SPY',
+             preferred_price_point: str = 'close',
+             preferred_benchmark: str = 'SPY',
              data_interval: str = '1d',
              initial_capital: float = 100000,
              commission: float = 0):
@@ -37,7 +38,8 @@ def backtest(strategy: str,
                                              end_date,
                                              interval=data_interval)
             for symbol in symbol_bucket:
-                a=bt.Backtest(locals()['strategy'](data_batch), preferred_price_point)
+                a = bt.Backtest(locals()['strategy'](data_batch),
+                                preferred_price_point)
                 print(a.preferred_price_point)
                 '''
                 signals=locals()['strategy'](data_batch)
@@ -57,7 +59,7 @@ def backtest(strategy: str,
                 #df['trades']=bt.trades
                 #df['positions in '+symbol]=100*df['positions']
                 #print(bt.trades)
-         
+
             logger.info("Received Signals from {}".format(strategy.__name__))
 
     except (KeyboardInterrupt, SystemExit):
@@ -79,7 +81,7 @@ def backtest(strategy: str,
 def live_trade(strategy_name: str,
                symbol_bucket: list,
                data_feed_type: str,
-               states: list = ['open','postmarket','close'],
+               states: list = ['open', 'postmarket', 'close'],
                batch_size: int = 1000,
                feed_delay: float = 0.0,
                fake_feed: bool = False):
@@ -119,6 +121,7 @@ def live_trade(strategy_name: str,
         )
         raise exception
         exit()
+
 
 '''
 def generate_positions_and_handle_portfolio(symbol, signals, data, commission,

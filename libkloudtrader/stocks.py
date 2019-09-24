@@ -311,14 +311,18 @@ def tick_data(symbol: str,
     )
     try:
         if response:
-            if not dataframe:
+            if dataframe:
+                if 'data' in response.json()["series"]:
+                    data = response.json()["series"]["data"]
+                    dataframe = pandas.DataFrame(data)
+                    dataframe['datetime'] = pandas.to_datetime(
+                        dataframe['time'])
+                    dataframe.set_index(['datetime'], inplace=True)
+                    del dataframe['time']
+                    del dataframe['timestamp']
+                    return dataframe
                 return response.json()
-            else:
-                data = response.json()["series"]["data"]
-                dataframe = pandas.DataFrame(data)
-                dataframe['time'] = pandas.to_datetime(dataframe['time'])
-                dataframe.set_index(['time'], inplace=True)
-                return dataframe
+            return response.json()
         if response.status_code == 400:
             logger.error('Oops! An error Occurred ⚠️')
             raise BadRequest(response.text)
@@ -365,8 +369,10 @@ def min1_bar_data(symbol: str,
         else:
             data = response.json()["series"]["data"]
             dataframe = pandas.DataFrame(data)
-            dataframe['time'] = pandas.to_datetime(dataframe['time'])
-            dataframe.set_index(['time'], inplace=True)
+            dataframe['datetime'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['datetime'], inplace=True)
+            del dataframe['time']
+            del dataframe['timestamp']
             return dataframe
     if response.status_code == 400:
         logger.error('Oops! An error Occurred ⚠️')
@@ -386,7 +392,7 @@ def min5_bar_data(
         dataframe: bool = True,
 ) -> dict:
     """Not in docs. Used in ohlcv(). Get historical bar data with 5 minute interval for a given period of time. 
-    Goes upto 40 days with data points duing open market. Goes upto 18 days will all data points."""
+    Goes upto 40 days with data points during open market. Goes upto 18 days will all data points."""
     if brokerage == "Tradier Inc.":
         url = TR_BROKERAGE_API_URL
     elif brokerage == "miscpaper":
@@ -412,8 +418,10 @@ def min5_bar_data(
         else:
             data = response.json()["series"]["data"]
             dataframe = pandas.DataFrame(data)
-            dataframe['time'] = pandas.to_datetime(dataframe['time'])
-            dataframe.set_index(['time'], inplace=True)
+            dataframe['datetime'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['datetime'], inplace=True)
+            del dataframe['time']
+            del dataframe['timestamp']
             return dataframe
     if response.status_code == 400:
         logger.error('Oops! An error Occurred ⚠️')
@@ -457,8 +465,10 @@ def min15_bar_data(symbol: str,
         else:
             data = response.json()["series"]["data"]
             dataframe = pandas.DataFrame(data)
-            dataframe['time'] = pandas.to_datetime(dataframe['time'])
-            dataframe.set_index(['time'], inplace=True)
+            dataframe['datetime'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['datetime'], inplace=True)
+            del dataframe['time']
+            del dataframe['timestamp']
             return dataframe
     if response.status_code == 400:
         logger.error('Oops! An error Occurred ⚠️')
@@ -495,25 +505,25 @@ def ohlcv(symbol: str,
     elif interval == "1M":
         interval = "monthly"
     elif interval == "1m":
-        return min1_bar_data(symbol,
-                             start,
-                             end,
+        return min1_bar_data(symbol=symbol,
+                             start=start,
+                             end=end,
                              data_filter='open',
                              brokerage=brokerage,
                              access_token=access_token,
                              dataframe=True)
     elif interval == "5m":
-        return min5_bar_data(symbol,
-                             start,
-                             end,
+        return min5_bar_data(symbol=symbol,
+                             start=start,
+                             end=end,
                              data_filter='open',
                              brokerage=brokerage,
                              access_token=access_token,
                              dataframe=True)
     elif interval == "15m":
-        return min15_bar_data(symbol,
-                              start,
-                              end,
+        return min15_bar_data(symbol=symbol,
+                              start=start,
+                              end=end,
                               data_filter='open',
                               brokerage=brokerage,
                               access_token=access_token,
@@ -535,8 +545,9 @@ def ohlcv(symbol: str,
         else:
             data = response.json()['history']['day']
             dataframe = pandas.DataFrame(data)
-            dataframe['date'] = pandas.to_datetime(dataframe['date'])
-            dataframe.set_index(['date'], inplace=True)
+            dataframe['datetime'] = pandas.to_datetime(dataframe['date'])
+            dataframe.set_index(['datetime'], inplace=True)
+            del dataframe['date']
             return dataframe
     if response.status_code == 400:
         logger.error('Oops! An error Occurred ⚠️')

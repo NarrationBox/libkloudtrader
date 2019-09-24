@@ -13,13 +13,14 @@ from libkloudtrader.exceptions import AnalysisException
 logger = start_logger(__name__)
 '''Not in docs. helper functions'''
 
+
 def fill_for_noncomputable_vals(input_data, result_data):
     """Fill non computed series/dataframe values with Nan"""
-    non_computable_values = np.repeat(
-        np.nan, len(input_data) - len(result_data)
-        )
+    non_computable_values = np.repeat(np.nan,
+                                      len(input_data) - len(result_data))
     filled_result_data = np.append(non_computable_values, result_data)
     return filled_result_data
+
 
 def check_for_period_error(data: Any, period: int):
     """
@@ -66,17 +67,20 @@ def check_data_for_annual_trading_days(data: Any):
             "Data has more or less entries than one year should have. Please use returns() function to calculate returns for n number of days."
         )
 
+
 def smma(data, period):
     """smoothed_moving_average"""
     try:
         series = pd.Series(data)
-        sma=series.ewm(alpha = 1.0/period).mean().values.flatten()
-        return pd.Series(sma,name='sma',index=data.index)
+        sma = series.ewm(alpha=1.0 / period).mean().values.flatten()
+        return pd.Series(sma, name='sma', index=data.index)
     except Exception as exception:
         raise exception
 
 
 """In Docs"""
+
+
 def accumulation_distribution_index(high, low, close, volume):
     """Accumulation/Distribution Index (ADI)"""
     try:
@@ -109,15 +113,19 @@ def awesome_oscillator(high, low, short_period=5, long_period=34):
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
+
 def momentum(data, period):
     '''Calculate momentum for a given period'''
     try:
         logger.info("Calculating Momentum for period = {}".format(period))
         check_period_type(period)
-        check_for_period_error(data,period)
-        momentum = [data[i] - data[i+1-period] for i in range(period-1, len(data))]
+        check_for_period_error(data, period)
+        momentum = [
+            data[i] - data[i + 1 - period]
+            for i in range(period - 1, len(data))
+        ]
         momentum = fill_for_noncomputable_vals(data, momentum)
-        return pd.Series(momentum,name="momentum",index=data.index)
+        return pd.Series(momentum, name="momentum", index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -145,13 +153,11 @@ def money_flow_index(high, low, close, volume, period):
         mf = tp * df['Volume'] * df['Up_or_Down']
 
         # 4 positive and negative money flow with n periods
-        n_positive_mf = mf.rolling(
-            period).apply(lambda x: np.sum(np.where(x >= 0.0, x, 0.0)),
-                          raw=True)
+        n_positive_mf = mf.rolling(period).apply(
+            lambda x: np.sum(np.where(x >= 0.0, x, 0.0)), raw=True)
         n_negative_mf = abs(
-            mf.rolling(
-                period).apply(lambda x: np.sum(np.where(x < 0.0, x, 0.0)),
-                              raw=True))
+            mf.rolling(period).apply(
+                lambda x: np.sum(np.where(x < 0.0, x, 0.0)), raw=True))
         # 5 money flow index
         mr = n_positive_mf / n_negative_mf
         mr = (100 - (100 / (1 + mr)))
@@ -165,12 +171,12 @@ def money_flow_index(high, low, close, volume, period):
 def relative_strength_index(data, period, ignore_log=False):
     """Relative Strength Index"""
     try:
-        if ignore_log!=True:
+        if ignore_log != True:
             logger.info(
                 'Calculating Relative Strength Index for peirod = {}'.format(
                     period))
         check_period_type(period)
-        
+
         diff = data.diff(1)
         which_dn = diff < 0
         up, dn = diff, diff * 0
@@ -215,8 +221,15 @@ def true_strength_index(data, high_period, low_period):
         raise exception
 
 
-def ultimate_oscillator(high, low, close, short_period=7, medium_period=14,
-                        long_period=28, ws=4.0, wm=2.0, wl=1.0):
+def ultimate_oscillator(high,
+                        low,
+                        close,
+                        short_period=7,
+                        medium_period=14,
+                        long_period=28,
+                        ws=4.0,
+                        wm=2.0,
+                        wl=1.0):
     """Ultimate Oscillator
     BP = Close - Minimum(Low or Prior Close).
     TR = Maximum(High or Prior Close)  -  Minimum(Low or Prior Close)
@@ -232,14 +245,19 @@ def ultimate_oscillator(high, low, close, short_period=7, medium_period=14,
             .format(short_period, medium_period, long_period))
         check_inputs_length(high, low, close)
         min_l_or_pc = close.shift(1, fill_value=close.mean()).combine(low, min)
-        max_h_or_pc = close.shift(1, fill_value=close.mean()).combine(high, max)
+        max_h_or_pc = close.shift(1,
+                                  fill_value=close.mean()).combine(high, max)
         bp = close - min_l_or_pc
         tr = max_h_or_pc - min_l_or_pc
-        avg_s = bp.rolling(short_period, min_periods=0).sum() / tr.rolling(short_period, min_periods=0).sum()
-        avg_m = bp.rolling(medium_period, min_periods=0).sum() / tr.rolling(medium_period, min_periods=0).sum()
-        avg_l = bp.rolling(long_period, min_periods=0).sum() / tr.rolling(long_period, min_periods=0).sum()
+        avg_s = bp.rolling(short_period, min_periods=0).sum() / tr.rolling(
+            short_period, min_periods=0).sum()
+        avg_m = bp.rolling(medium_period, min_periods=0).sum() / tr.rolling(
+            medium_period, min_periods=0).sum()
+        avg_l = bp.rolling(long_period, min_periods=0).sum() / tr.rolling(
+            long_period, min_periods=0).sum()
 
-        uo = 100.0 * ((ws * avg_s) + (wm * avg_m) + (wl * avg_l)) / (ws + wm + wl)
+        uo = 100.0 * ((ws * avg_s) + (wm * avg_m) +
+                      (wl * avg_l)) / (ws + wm + wl)
         return uo
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -250,18 +268,17 @@ def aroon(data, period):
     """Aroon"""
     try:
         check_period_type(period)
-        check_for_period_error(data,period)
+        check_for_period_error(data, period)
         logger.info('Calculating Aroon for period = {}'.format(period))
         df = pd.DataFrame()
-        df['aroonup'] = data.rolling(period, min_periods=0).apply(lambda x: float(np.argmin(x) + 1) / period * 100, raw=True)
-        df['aroondown'] = data.rolling(period, min_periods=0).apply(lambda x: float(np.argmax(x) + 1) / period* 100, raw=True)
+        df['aroonup'] = data.rolling(period, min_periods=0).apply(
+            lambda x: float(np.argmin(x) + 1) / period * 100, raw=True)
+        df['aroondown'] = data.rolling(period, min_periods=0).apply(
+            lambda x: float(np.argmax(x) + 1) / period * 100, raw=True)
         return df
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
-
-
-
 
 
 def average_true_range(high, low, close, period):
@@ -276,39 +293,42 @@ def average_true_range(high, low, close, period):
         atr = np.zeros(len(close))
         atr[0] = tr[1::].mean()
         for i in range(1, len(atr)):
-            atr[i] = (atr[i-1] * (period-1) + tr.iloc[i]) / float(period)
+            atr[i] = (atr[i - 1] * (period - 1) + tr.iloc[i]) / float(period)
         atr = pd.Series(data=atr, index=tr.index)
         return atr
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
+
 def upper_bollinger_band(data, period, std_mult=2.0):
     '''upper bollinger band'''
     try:
-        simple_ma=data.rolling(period).mean()[period-1:]
+        simple_ma = data.rolling(period).mean()[period - 1:]
         upper_bb = []
         for idx in range(len(data) - period + 1):
             std_dev = np.std(data[idx:idx + period])
             upper_bb.append(simple_ma[idx] + std_dev * std_mult)
         upper_bb = fill_for_noncomputable_vals(data, upper_bb)
 
-        return pd.Series(upper_bb,index=data.index)
+        return pd.Series(upper_bb, index=data.index)
     except Exception as exception:
         raise exception
 
-def lower_bollinger_band(data,period, std=2.0):
+
+def lower_bollinger_band(data, period, std=2.0):
     '''lower bollinger band'''
     try:
-        simple_ma=data.rolling(period).mean()[period-1:]
+        simple_ma = data.rolling(period).mean()[period - 1:]
         lower_bb = []
         for idx in range(len(data) - period + 1):
             std_dev = np.std(data[idx:idx + period])
             lower_bb.append(simple_ma[idx] - std_dev * std)
         lower_bb = fill_for_noncomputable_vals(data, lower_bb)
-        return pd.Series(lower_bb,index=data.index)
+        return pd.Series(lower_bb, index=data.index)
     except Exception as exception:
         raise exception
+
 
 def bollinger_bands(data, period=20, std=2.0):
     """Bollinger Bands"""
@@ -320,7 +340,7 @@ def bollinger_bands(data, period=20, std=2.0):
         df = pd.DataFrame()
         df['upperband'] = upper_bollinger_band(data, period)
         df['middleband'] = data.rolling(period).mean()
-        df['lowerband'] = lower_bollinger_band(data,period)
+        df['lowerband'] = lower_bollinger_band(data, period)
         return df
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -334,7 +354,7 @@ def chaikin_money_flow(high, low, close, volume, period):
             "Calculating Chaikin Money Flow for period = {}".format(period))
         check_period_type(period)
         check_inputs_length(high, low, close, volume)
-        
+
         mfv = ((close - low) - (high - close)) / (high - low)
         mfv = mfv.fillna(0.0)  # float division by zero
         mfv *= volume
@@ -353,14 +373,13 @@ def chande_momentum_oscillator(data, period):
             "Calculating Chande Momentum Oscillator for period = {}".format(
                 period))
         check_period_type(period)
-        
-        
+
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
 
 
-def commodity_channel_index(high, low, close,period,c=0.015):
+def commodity_channel_index(high, low, close, period, c=0.015):
     """Commodity Channel Index"""
     try:
         logger.info(
@@ -369,12 +388,12 @@ def commodity_channel_index(high, low, close,period,c=0.015):
         check_period_type(period)
         check_inputs_length(high, low, close)
         pp = (high + low + close) / 3.0
-        cci = (pp - pp.rolling(period, min_periods=0).mean()) / (c * pp.rolling(period, min_periods=0).std())
+        cci = (pp - pp.rolling(period, min_periods=0).mean()) / (
+            c * pp.rolling(period, min_periods=0).std())
         return cci
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
-
 
 
 def cumulative_returns(daily_returns):
@@ -418,7 +437,7 @@ def detrended_price_oscillator(data, period):
             "Calculating Detrended Price Oscillator for period = {}".format(
                 period))
         check_period_type(period)
-        
+
         dpo = data.shift(int((0.5 * period) + 1),
                          fill_value=data.mean()) - data.rolling(
                              period, min_periods=0).mean()
@@ -434,7 +453,7 @@ def donchian_channel(data, period):
         logger.info(
             "Calculating Donchian Channels for period = {}".format(period))
         check_period_type(period)
-        
+
         #dc high band
         dc_high_band = data.rolling(period, min_periods=0).max()
 
@@ -472,10 +491,10 @@ def double_ema(data, period):
         logger.info(
             "Calculating Double Exponential Moving Average for period = {}".
             format(period))
-        check_period_type(period) 
-        ema1=data.ewm(span=period, min_periods=period).mean()
-        ema2=ema1.ewm(span=period, min_periods=period).mean()
-        dema_data=2*ema1-(ema2)
+        check_period_type(period)
+        ema1 = data.ewm(span=period, min_periods=period).mean()
+        ema2 = ema1.ewm(span=period, min_periods=period).mean()
+        dema_data = 2 * ema1 - (ema2)
         return dema_data
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -517,9 +536,9 @@ def ema(data, period):
             "Calculating Exponential Moving Average for period = {}".format(
                 period))
         check_period_type(period)
-        
+
         ema_data = data.ewm(span=period, min_periods=period).mean()
-        return pd.Series(ema_data,name="ema")
+        return pd.Series(ema_data, name="ema")
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -550,7 +569,10 @@ def ichimoku_cloud(high, low, short_period, medium_period, long_period):
         raise exception
 
 
-def kaufman_adaptive_moving_average(data:Any, period:int,  pow1:int=2, pow2:int=30):
+def kaufman_adaptive_moving_average(data: Any,
+                                    period: int,
+                                    pow1: int = 2,
+                                    pow2: int = 30):
     '''Kaufman Adaptive Moving Average'''
     try:
         logger.info(
@@ -563,19 +585,21 @@ def kaufman_adaptive_moving_average(data:Any, period:int,  pow1:int=2, pow2:int=
         ER_num = abs(data_values - np.roll(data_values, period))
         ER_den = vol.rolling(period).sum()
         ER = ER_num / ER_den
-        sc = (( ER*(2.0/(pow1+1)-2.0/(pow2+1.0))+2/(pow2+1.0) ) ** 2.0).values
+        sc = ((ER * (2.0 / (pow1 + 1) - 2.0 / (pow2 + 1.0)) + 2 /
+               (pow2 + 1.0))**2.0).values
         kama = np.zeros(sc.size)
         N = len(kama)
         first_value = True
         for i in range(N):
             if np.isnan(sc[i]):
-             kama[i] = np.nan
+                kama[i] = np.nan
             else:
                 if first_value:
                     kama[i] = data_values[i]
                     first_value = False
                 else:
-                    kama[i] = kama[i-1] + sc[i] * (data_values[i] - kama[i-1])
+                    kama[i] = kama[i -
+                                   1] + sc[i] * (data_values[i] - kama[i - 1])
         kama = pd.Series(kama, name='kama', index=data.index)
         return kama
     except Exception as exception:
@@ -614,7 +638,7 @@ def know_sure_thing(data: Any, r1: int, r2: int, r3: int, r4: int, n1: int,
         logger.info("Calculating Know Sure Thing...")
         for period in (r1, r2, r3, r4, n1, n2, n3, n4, nsig):
             check_period_type(period)
-            
+
         rocma1 = ((data - data.shift(r1, fill_value=data.mean())) /
                   data.shift(r1, fill_value=data.mean())).rolling(
                       n1, min_periods=0).mean()
@@ -642,12 +666,13 @@ def macd(data, n_sign, short_period=12, long_period=26, fillna=False):
             .format(short_period, long_period))
         for period in (short_period, long_period):
             check_period_type(period)
-            
+
         df = pd.DataFrame()
         emafast = data.ewm(span=short_period, min_periods=short_period).mean()
         emaslow = data.ewm(span=long_period, min_periods=long_period).mean()
         df['macd'] = emafast - emaslow
-        df['macd_signal'] =  df['macd'].ewm(span=n_sign, min_periods=n_sign).mean()
+        df['macd_signal'] = df['macd'].ewm(span=n_sign,
+                                           min_periods=n_sign).mean()
         df['macd_difference'] = df['macd'] - df['macd_signal']
         return df
     except Exception as exception:
@@ -665,7 +690,8 @@ def mass_index(high, low, short_period, long_period):
             check_period_type(period)
         check_inputs_length(high, low)
         amplitude = high - low
-        ema1 = amplitude.ewm(span=short_period, min_periods=short_period).mean()
+        ema1 = amplitude.ewm(span=short_period,
+                             min_periods=short_period).mean()
         ema2 = ema1.ewm(span=short_period, min_periods=short_period).mean()
         mass = ema1 / ema2
         mass = mass.rolling(long_period, min_periods=0).sum()
@@ -675,15 +701,13 @@ def mass_index(high, low, short_period, long_period):
         raise exception
 
 
-
-
 def median_price(high, low):
     """Calculating Median Price"""
     try:
         logger.info("Calculating Median Price...")
         check_inputs_length(high, low)
-        mp_data = (high+low)/2
-        
+        mp_data = (high + low) / 2
+
         return mp_data
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -697,7 +721,7 @@ def ma(data, period, matype=0):
             'Calculating Moving Average for period = {}'.format(period))
         check_period_type(period)
         ma_data = data.rolling(period).mean()
-        return pd.Series(ma_data,name="moving_average")
+        return pd.Series(ma_data, name="moving_average")
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -726,7 +750,6 @@ def negative_volume_index(data, volume):
         raise exception
 
 
-
 def on_balance_volume(data, volume):
     """On Balance Volume"""
     try:
@@ -737,7 +760,7 @@ def on_balance_volume(data, volume):
         c1 = data < data.shift(1)
         c2 = data > data.shift(1)
         if c1.any():
-            df.loc[c1, 'OBV'] = - volume
+            df.loc[c1, 'OBV'] = -volume
         if c2.any():
             df.loc[c2, 'OBV'] = volume
         obv = df['OBV'].cumsum()
@@ -745,9 +768,6 @@ def on_balance_volume(data, volume):
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
-
-
-
 
 
 def percentage_price_oscillator(data, short_period, long_period, matype=0):
@@ -758,14 +778,14 @@ def percentage_price_oscillator(data, short_period, long_period, matype=0):
             .format(short_period, long_period))
         for period in (short_period, long_period):
             check_period_type(period)
-        ema_short = data.ewm(span=short_period, min_periods=short_period).mean()
+        ema_short = data.ewm(span=short_period,
+                             min_periods=short_period).mean()
         ema_long = data.ewm(span=long_period, min_periods=long_period).mean()
         ppo = ((ema_short - ema_long) / ema_long) * 100
-        return pd.Series(ppo,name='ppo')
+        return pd.Series(ppo, name='ppo')
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
-
 
 
 def rate_of_change(data, period):
@@ -774,10 +794,13 @@ def rate_of_change(data, period):
         logger.info(
             "Calculating Rate of Change for period = {}".format(period))
         check_period_type(period)
-        rocs = [((data[idx] - data[idx - (period - 1)]) /
-         data[idx - (period - 1)]) * 100 for idx in range(period - 1, len(data))]
+        rocs = [
+            ((data[idx] - data[idx - (period - 1)]) / data[idx -
+                                                           (period - 1)]) * 100
+            for idx in range(period - 1, len(data))
+        ]
         rocs = fill_for_noncomputable_vals(data, rocs)
-        return pd.Series(rocs,name="rate_of_change",index=data.index)
+        return pd.Series(rocs, name="rate_of_change", index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -797,25 +820,32 @@ def standard_deviation(data: Any):
 def moving_standard_deviation(data, period):
     """Moving standard deviation"""
     try:
-        logger.info("Calculating Moving Standar Deviation for period = {}".format(period))
-        return data.rolling(period).std()
+        logger.info(
+            "Calculating Moving Standar Deviation for period = {}".format(
+                period))
+        msd = data.rolling(period).std()
+        return pd.Series(msd, name='msd')
     except Exception as exception:
         raise exception
     logger.error('Oops! An error Occurred ⚠️')
 
 
-def stochastic_rsi(data,period):
+def stochastic_rsi(data, period):
     """Stochastic RSI"""
     try:
         logger.info(
-            'Calculating Stochastic RSI for period = {}'
-            .format(period))
+            'Calculating Stochastic RSI for period = {}'.format(period))
         check_period_type(period)
         check_for_period_error(data, period)
         rsi = relative_strength_index(data, period, ignore_log=True)[period:]
-        stochrsi = [100 * ((rsi[idx] - np.min(rsi[idx+1-period:idx+1])) / (np.max(rsi[idx+1-period:idx+1]) - np.min(rsi[idx+1-period:idx+1]))) for idx in range(period-1, len(rsi))]
+        stochrsi = [
+            100 * ((rsi[idx] - np.min(rsi[idx + 1 - period:idx + 1])) /
+                   (np.max(rsi[idx + 1 - period:idx + 1]) -
+                    np.min(rsi[idx + 1 - period:idx + 1])))
+            for idx in range(period - 1, len(rsi))
+        ]
         stochrsi = fill_for_noncomputable_vals(data, stochrsi)
-        return pd.Series(stochrsi,name="stochrsi",index=data.index)
+        return pd.Series(stochrsi, name="stochrsi", index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -825,15 +855,16 @@ def trix(data, period):
     """TRIX"""
     try:
         logger.info('Calculating Trix for period = {}'.format(period))
-       
+
         check_period_type(period)
-        
-        ema1=data.ewm(span=period, min_periods=period).mean()
-        ema2=ema1.ewm(span=period, min_periods=period).mean()
-        ema3=ema2.ewm(span=period, min_periods=period).mean()
-        trix = (ema3 - ema3.shift(1, fill_value=ema3.mean())) / ema3.shift(1, fill_value=ema3.mean())
+
+        ema1 = data.ewm(span=period, min_periods=period).mean()
+        ema2 = ema1.ewm(span=period, min_periods=period).mean()
+        ema3 = ema2.ewm(span=period, min_periods=period).mean()
+        trix = (ema3 - ema3.shift(1, fill_value=ema3.mean())) / ema3.shift(
+            1, fill_value=ema3.mean())
         trix *= 100
-        return pd.Series(trix, name='trix',index=data.index)
+        return pd.Series(trix, name='trix', index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -846,10 +877,10 @@ def triangular_ma(data, period):
             'Calculating Triangular Moving Average for period = {}'.format(
                 period))
         check_period_type(period)
-        
-        ma1=data.rolling(period).mean()
-        tma=ma1.rolling(period).mean()
-        return pd.Series(tma,name='tma',index=data.index)
+
+        ma1 = data.rolling(period).mean()
+        tma = ma1.rolling(period).mean()
+        return pd.Series(tma, name='tma', index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -862,10 +893,10 @@ def triple_ema(data, period):
             "Calculating Triple Exponential Moving Average for period = {}".
             format(period))
         check_period_type(period)
-        ema1=data.ewm(span=period, min_periods=period).mean()
-        ema2=ema1.ewm(span=period, min_periods=period).mean()
-        ema3=ema2.ewm(span=period, min_periods=period).mean()
-        tema = (3*ema1) - (3*ema2) + ema3
+        ema1 = data.ewm(span=period, min_periods=period).mean()
+        ema2 = ema1.ewm(span=period, min_periods=period).mean()
+        ema3 = ema2.ewm(span=period, min_periods=period).mean()
+        tema = (3 * ema1) - (3 * ema2) + ema3
         return pd.Series(tema, name="tema", index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
@@ -877,8 +908,9 @@ def typical_price(high, low, close):
     try:
         logger.info('Calculating Typical Price...')
         check_inputs_length(high, low, close)
-        tp_data = [(high[idx] + low[idx] + close[idx]) / 3 for idx in range(0, len(close))]
-        return pd.Series(tp_data,name="typical_price",index=close.index)
+        tp_data = [(high[idx] + low[idx] + close[idx]) / 3
+                   for idx in range(0, len(close))]
+        return pd.Series(tp_data, name="typical_price", index=close.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -898,11 +930,12 @@ def variance(data: Any):
 def moving_variance(data, period):
     """Moving variance"""
     try:
-        logger.info('Calculating Moving Variance for period = {}...'.format(period))
+        logger.info(
+            'Calculating Moving Variance for period = {}...'.format(period))
         check_period_type(period)
         check_for_period_error(data, period)
         var_data = data.rolling(period).var()
-        return pd.Series(var_data,name="moving_variance",index=data.index)
+        return pd.Series(var_data, name="mv", index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -940,8 +973,11 @@ def williams_r(high, low, close, period):
     """Williams' %R"""
     try:
         logger.info("Calculating Williams' %R for period = {}")
-        hh = high.rolling(period, min_periods=0).max()  # highest high over lookback period lbp
-        ll = low.rolling(period, min_periods=0).min()  # lowest low over lookback period lbp
+        hh = high.rolling(
+            period,
+            min_periods=0).max()  # highest high over lookback period lbp
+        ll = low.rolling(
+            period, min_periods=0).min()  # lowest low over lookback period lbp
         wr = -100 * (hh - close) / (hh - ll)
         return pd.Series(wr, index=close.index)
     except Exception as exception:
@@ -956,19 +992,21 @@ def wma(data, period):
             'Calculating Weighted Moving Average for period = {}'.format(
                 period))
         check_period_type(period)
-        
+
         k = (period * (period + 1)) / 2.0
         wmas = []
-        for idx in range(0, len(data)-period+1):
-            product = [data[idx + period_idx] * (period_idx + 1) for period_idx in range(0, period)]
+        for idx in range(0, len(data) - period + 1):
+            product = [
+                data[idx + period_idx] * (period_idx + 1)
+                for period_idx in range(0, period)
+            ]
             wma = sum(product) / k
             wmas.append(wma)
         wmas = fill_for_noncomputable_vals(data, wmas)
-        return pd.Series(wmas,index=data.index)
+        return pd.Series(wmas, index=data.index)
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
-
 
 
 def annual_return(data):
@@ -1049,13 +1087,12 @@ def moving_volatility(daily_returns, period):
         raise exception
 
 
-
 def coppock_curve(data, period):
     """Coppock Curve"""
     try:
         logger.info("Calculating Cappock Curve for period = {}".format(period))
         check_period_type(period)
-        
+
         M = data.diff(int(period * 11 / 10) - 1)
         N = data.shift(int(period * 11 / 10) - 1)
         ROC1 = M / N
@@ -1080,7 +1117,7 @@ def hull_moving_average(data, period):
         logger.info(
             'Calculating Hull Moving Average for period = {}'.format(period))
         check_period_type(period)
-        
+
         hma = wma(2 * wma(data, int(period / 2)) - wma(data, period),
                   int(np.sqrt(period)))
         return hma
@@ -1379,7 +1416,7 @@ def vertical_horizontal_filter(data: Any, period: int):
         logger.info(
             'Calculating Vertical Horizontal Filter for period = {}'.format(
                 period))
-        
+
         vhf = [
             abs(
                 np.max(data[idx + 1 - period:idx + 1]) -

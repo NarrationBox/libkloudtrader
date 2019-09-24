@@ -1,7 +1,7 @@
 import logging
 
 
-def start_logger(module,ignore_module=None):
+def start_logger(module, ignore_module=None):
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s",
                         datefmt='%A, %B %d, %Y %I:%M:%S %p',
                         level="INFO")
