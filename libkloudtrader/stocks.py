@@ -544,6 +544,8 @@ def ohlcv(symbol: str,
             return response.json()
         else:
             data = response.json()['history']['day']
+            if isinstance(data, dict):
+                data = [data]
             dataframe = pandas.DataFrame(data)
             dataframe['datetime'] = pandas.to_datetime(dataframe['date'])
             dataframe.set_index(['datetime'], inplace=True)
