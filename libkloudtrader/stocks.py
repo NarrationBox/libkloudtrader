@@ -173,7 +173,7 @@ def latest_quote(
         raise BadRequest(response.text)
     if response.status_code == 401:
         if response.text == "Session not found":
-            live_quotes(symbol)
+            create_session(brokerage=brokerage, access_token=access_token)
         else:
             logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
@@ -225,7 +225,7 @@ def latest_trade(
         raise BadRequest(response.text)
     if response.status_code == 401:
         if response.text == "Session not found":
-            live_quotes(symbol)
+            create_session(brokerage=brokerage, access_token=access_token)
         else:
             logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
@@ -275,7 +275,7 @@ def intraday_summary(
         raise BadRequest(response.text)
     if response.status_code == 401:
         if response.text == "Session not found":
-            live_quotes(symbol)
+            create_session(brokerage=brokerage, access_token=access_token)
         else:
             logger.error('Oops! An error Occurred ⚠️')
             raise InvalidCredentials(response.text)
