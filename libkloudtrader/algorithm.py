@@ -9,6 +9,8 @@ from libkloudtrader.enumerables import Data_Types
 import libkloudtrader.processing as processing
 from libkloudtrader.logs import start_logger
 import libkloudtrader.backtest as bt
+import libkloudtrader.crypto as crypto
+import asyncio
 #pd.set_option('display.max_columns', None)  # or 1000
 #pd.set_option('display.max_rows', None)  # or 1000
 #pd.set_option('display.max_colwidth', -1)  # or 199
@@ -83,7 +85,7 @@ def live_trade(strategy: str,
                data_feed_type: str,
                exempted_states: list = ['close'],
                batch_size: int = 1000,
-               feed_delay: float = 0.0,
+               data_feed_delay: float = 0.0,
                fake_feed: bool = False):
     try:
         logger.info("{} is now entering the live markets. 📈\n".format(
@@ -98,7 +100,7 @@ def live_trade(strategy: str,
                 'This Data Feed is not available for live trading. Please use libkloudtrader.algorithm.backtest() for backtesting or using hisotrical data.'
             )
         if data_feed_type in ("CRYPTO_live_feed", 'CRYPTO_live_feed_level2'):
-            feed_delay = 2
+            data_feed_delay = crypto.exchange_attribute('rateLimit')
         data_feed = Data_Types[data_feed_type].value
         while stocks.intraday_status()['state'] not in exempted_states:
             batch = processing.Buffer(batch_size, dtype=object)
@@ -109,7 +111,7 @@ def live_trade(strategy: str,
                     locals()['strategy'](data_batch)
                     if len(batch) == batch_size:
                         batch.popleft()
-                    time.sleep(feed_delay)
+                    time.sleep(data_feed_delay / 1000)
     except (KeyboardInterrupt, SystemExit):
         print('\n')
         logger.critical("User's keyboard prompt stopped {}".format(

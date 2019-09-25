@@ -172,10 +172,10 @@ def latest_order_book_entry(symbol: str,
     try:
         check_exchange_existence(exchange=exchange)
         response = asyncio.get_event_loop().run_until_complete(
-            getLatestEntryOrderBook(symbol=symbol,
-                                    number_of_data_points=1,
-                                    exchange=exchange,
-                                    rate_limit=rate_limit))
+            getOrderBook(symbol=symbol,
+                         number_of_data_points=1,
+                         exchange=exchange,
+                         rate_limit=rate_limit))
         latest_orderbook_entry_dict = {}
         latest_orderbook_entry_dict['symbol'] = symbol
         latest_orderbook_entry_dict['ask'] = response['asks'][0][0] if len(
@@ -201,10 +201,10 @@ def latest_L2_order_book_entry(symbol: str,
     try:
         check_exchange_existence(exchange=exchange)
         response = asyncio.get_event_loop().run_until_complete(
-            getLatestEntryOrderBookL2(symbol=symbol,
-                                      number_of_data_points=1,
-                                      exchange=exchange,
-                                      rate_limit=rate_limit))
+            getOrderBookL2(symbol=symbol,
+                           number_of_data_points=1,
+                           exchange=exchange,
+                           rate_limit=rate_limit))
         latest_orderbook_entry_dict = {}
         latest_orderbook_entry_dict['symbol'] = symbol
         latest_orderbook_entry_dict['ask'] = response['asks'][0][0] if len(
@@ -231,11 +231,10 @@ def order_book(symbol: str,
     try:
         check_exchange_existence(exchange=exchange)
         return asyncio.get_event_loop().run_until_complete(
-            getLatestEntryOrderBook(
-                symbol=symbol,
-                number_of_data_points=number_of_data_points,
-                exchange=exchange,
-                rate_limit=rate_limit))
+            getOrderBook(symbol=symbol,
+                         number_of_data_points=number_of_data_points,
+                         exchange=exchange,
+                         rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -249,11 +248,10 @@ def L2_order_book(symbol: str,
     try:
         check_exchange_existence(exchange=exchange)
         return asyncio.get_event_loop().run_until_complete(
-            getLatestEntryOrderBookL2(
-                symbol=symbol,
-                number_of_data_points=number_of_data_points,
-                exchange=exchange,
-                rate_limit=rate_limit))
+            getOrderBookL2(symbol=symbol,
+                           number_of_data_points=number_of_data_points,
+                           exchange=exchange,
+                           rate_limit=rate_limit))
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
         raise exception
@@ -819,12 +817,3 @@ def incoming_tick_data_handler_level2(symbol: str,
     latest_orderbook_entry_dict['tradesize'] = latest_trades[0]['amount']
     latest_orderbook_entry_dict['tradedate'] = latest_trades[0]['datetime']
     return latest_orderbook_entry_dict
-
-
-'''
-import time
-
-while True:
-    print(order_book('BTC/USD'))
-    time.sleep(2)
-'''

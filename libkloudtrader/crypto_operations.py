@@ -123,31 +123,31 @@ async def ExchangeMarkets(exchange: str, rate_limit: str) -> dict:
         await exchange_class.close()
         return data
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
@@ -163,31 +163,31 @@ async def MarketStructure(symbol: str, exchange: str, rate_limit: str) -> dict:
         await exchange_class.close()
         return data[symbol]
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        vexchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
@@ -207,31 +207,31 @@ async def getCurrencies(exchange: str, rate_limit: str) -> dict:
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
@@ -251,31 +251,31 @@ async def latestPriceInfo(symbol: str, exchange: str, rate_limit: str) -> dict:
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
@@ -295,31 +295,31 @@ async def latestPriceInfoForAllSymbols(exchange: str, rate_limit: str) -> dict:
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
@@ -341,31 +341,31 @@ async def latestTrades(symbol: str, number_of_data_points: int, exchange: str,
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
@@ -442,35 +442,36 @@ async def getOHLCV(symbol: str, start: str, end: str, interval: str,
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
-async def getLatestEntryOrderBook(symbol: str, number_of_data_points: int,
-                                  exchange: str, rate_limit: str) -> dict:
+async def getOrderBook(symbol: str, number_of_data_points: int, exchange: str,
+                       rate_limit: str) -> dict:
     """Get order book"""
     try:
         init_exchange = getattr(ccxt, exchange)
@@ -486,36 +487,36 @@ async def getLatestEntryOrderBook(symbol: str, number_of_data_points: int,
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
 
 
-async def getLatestEntryOrderBookL2(symbol: str, number_of_data_points: int,
-                                    exchange: str, rate_limit: str) -> dict:
+async def getOrderBookL2(symbol: str, number_of_data_points: int,
+                         exchange: str, rate_limit: str) -> dict:
     """Get order book"""
     try:
         init_exchange = getattr(ccxt, exchange)
@@ -531,29 +532,29 @@ async def getLatestEntryOrderBookL2(symbol: str, number_of_data_points: int,
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")
     except (ccxt.ArgumentsRequired, ccxt.BadRequest) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise BadRequest(exception)
     except (ccxt.InvalidOrder, ccxt.OrderNotFound, ccxt.OrderNotCached,
             ccxt.CancelPending, ccxt.OrderImmediatelyFillable,
             ccxt.OrderNotFillable, ccxt.DuplicateOrderId) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise OrderError(exception)
     except (ccxt.InsufficientFunds, ccxt.InvalidAddress, ccxt.AddressPending,
             ccxt.AccountSuspended) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AccountError(exception)
     except (ccxt.AuthenticationError, ccxt.PermissionDenied) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ResponseError(exception)
     except ccxt.NetworkError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise NetworkError(exception)
     except ccxt.ExchangeError as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise ExchangeError(exception)
     except Exception as exception:
-        exchange_class.close()
+        await exchange_class.close()
         raise exception
