@@ -410,6 +410,7 @@ async def getOHLCV(symbol: str, start: str, end: str, interval: str,
                     minutes=1)) / int(interval_value[interval]) + 1
                 since = int(converted_start.timestamp() * 1000)
             else:
+                await exchange_class.close()
                 InvalidTimeInterval("Invalid Time Interval")
         data = await exchange_class.fetchOHLCV(symbol, interval, since,
                                                int(limit))
@@ -427,7 +428,6 @@ async def getOHLCV(symbol: str, start: str, end: str, interval: str,
                 'volume': data[values][5]
             }
             final_list.append(new_list)
-        await exchange_class.close()
         if dataframe:
             import pandas
             columns = ['time', 'open', 'high', 'low', 'close', 'volume']
@@ -435,7 +435,9 @@ async def getOHLCV(symbol: str, start: str, end: str, interval: str,
             df['datetime'] = pandas.to_datetime(df['time'])
             df.set_index(['datetime'], inplace=True)
             del df['time']
+            await exchange_class.close()
             return df
+        await exchange_class.close()
         return final_list
         raise FunctionalityNotSupported(
             "Functionality not available for this exchange.")

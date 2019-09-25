@@ -148,10 +148,10 @@ def ohlcv(symbol: str,
         raise exception
 
 
-def latest_trades(symbol: str,
-                  number_of_data_points: int = 1,
-                  exchange: str = CRYPTO_EXCHANGE,
-                  rate_limit: bool = True):
+def trades(symbol: str,
+           number_of_data_points: int = 1,
+           exchange: str = CRYPTO_EXCHANGE,
+           rate_limit: bool = True):
     """Get recent trades for a particular trading symbol."""
     try:
         check_exchange_existence(exchange=exchange)

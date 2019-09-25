@@ -85,12 +85,12 @@ class Test_ohlcv:
 class Test_trades:
     def test_return_type(self):
         '''test return type'''
-        data=crypto.latest_trades('ETH/BTC',exchange="binance",number_of_data_points=5)
+        data=crypto.trades('ETH/BTC',exchange="binance",number_of_data_points=5)
         assert isinstance(data,list) and not 'message' in data
 
     def test_number_data_points(self):
         '''test number of data points'''
-        data=crypto.latest_trades('ETH/BTC',exchange="binance",number_of_data_points=5)
+        data=crypto.trades('ETH/BTC',exchange="binance",number_of_data_points=5)
         assert len(data)==5
 
 class Test_order_book:

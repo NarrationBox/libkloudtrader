@@ -78,16 +78,16 @@ def backtest(strategy: str,
     #print(locals()[a](symbol, start_date, end_date))
 
 
-def live_trade(strategy_name: str,
+def live_trade(strategy: str,
                symbol_bucket: list,
                data_feed_type: str,
-               states: list = ['open', 'postmarket', 'close'],
+               exempted_states: list = ['close'],
                batch_size: int = 1000,
                feed_delay: float = 0.0,
                fake_feed: bool = False):
     try:
         logger.info("{} is now entering the live markets. 📈\n".format(
-            strategy_name.__name__))
+            strategy.__name__))
         if isinstance(symbol_bucket, list):
             symbol_bucket = np.array(symbol_bucket)
         elif type(symbol_bucket) not in (numpy.ndarray, list):
@@ -100,22 +100,22 @@ def live_trade(strategy_name: str,
         if data_feed_type in ("CRYPTO_live_feed", 'CRYPTO_live_feed_level2'):
             feed_delay = 2
         data_feed = Data_Types[data_feed_type].value
-        while stocks.intraday_status()['state'] in states:
+        while stocks.intraday_status()['state'] not in exempted_states:
             batch = processing.Buffer(batch_size, dtype=object)
             while len(batch) < batch_size:
                 for symbol in symbol_bucket:
                     batch.append(data_feed(symbol, fake_feed=fake_feed))
                     data_batch = pd.DataFrame(batch)
-                    locals()['strategy_name'](data_batch)
+                    locals()['strategy'](data_batch)
                     if len(batch) == batch_size:
                         batch.popleft()
                     time.sleep(feed_delay)
     except (KeyboardInterrupt, SystemExit):
         print('\n')
         logger.critical("User's keyboard prompt stopped {}".format(
-            strategy_name.__name__))
+            strategy.__name__))
     except Exception as exception:
-        logger.critical('Exiting {}...‼️'.format(strategy_name.__name__))
+        logger.critical('Exiting {}...‼️'.format(strategy.__name__))
         logger.error(
             'Oops! Something went wrong while your algorithm was being deployed to live markets. ⚠️'
         )
