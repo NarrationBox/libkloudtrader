@@ -301,7 +301,7 @@ def average_true_range(high, low, close, period):
         raise exception
 
 
-def upper_bollinger_band(data, period, std_mult=2.0):
+def upper_bollinger_band(data, period, std_mult):
     '''upper bollinger band'''
     try:
         simple_ma = data.rolling(period).mean()[period - 1:]
@@ -316,7 +316,7 @@ def upper_bollinger_band(data, period, std_mult=2.0):
         raise exception
 
 
-def lower_bollinger_band(data, period, std=2.0):
+def lower_bollinger_band(data, period, std):
     '''lower bollinger band'''
     try:
         simple_ma = data.rolling(period).mean()[period - 1:]
@@ -338,9 +338,9 @@ def bollinger_bands(data, period=20, std=2.0):
         check_period_type(period)
         check_for_period_error(data, period)
         df = pd.DataFrame()
-        df['upperband'] = upper_bollinger_band(data, period)
+        df['upperband'] = upper_bollinger_band(data, period, std_mult=std)
         df['middleband'] = data.rolling(period).mean()
-        df['lowerband'] = lower_bollinger_band(data, period)
+        df['lowerband'] = lower_bollinger_band(data, period, std)
         return df
     except Exception as exception:
         logger.error('Oops! An error Occurred ⚠️')
