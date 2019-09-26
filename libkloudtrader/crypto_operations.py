@@ -3,6 +3,9 @@ import datetime
 import ccxt.async_support as ccxt
 import ccxt as non_async_ccxt
 from libkloudtrader.exceptions import InvlaidTimeInterval, FunctionalityNotSupported, BadRequest, OrderError, AccountError, AuthError, ResponseError, ExchangeError, NetworkError, InvalidCryptoExchange
+from libkloudtrader.logs import start_logger
+
+logger = start_logger(__name__)
 
 
 def check_exchange_existence(exchange: str) -> bool:
@@ -42,8 +45,13 @@ def ListOfExchanges(test_mode: bool) -> list:
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
-        raise NetworkError(exception)
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         raise ExchangeError(exception)
     except Exception as exception:
@@ -72,8 +80,13 @@ def ExchangeStructure(exchange: str) -> dict:
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
-        raise NetworkError(exception)
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         raise ExchangeError(exception)
     except Exception as exception:
@@ -103,8 +116,13 @@ def ExchangeAttribute(exchange: str, attribute: str) -> dict:
         raise AuthtError(exception)
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
-        raise NetworkError(exception)
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         raise ExchangeError(exception)
     except Exception as exception:
@@ -140,9 +158,14 @@ async def ExchangeMarkets(exchange: str, rate_limit: str) -> dict:
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -180,9 +203,14 @@ async def MarketStructure(symbol: str, exchange: str, rate_limit: str) -> dict:
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -224,9 +252,14 @@ async def getCurrencies(exchange: str, rate_limit: str) -> dict:
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -268,9 +301,14 @@ async def latestPriceInfo(symbol: str, exchange: str, rate_limit: str) -> dict:
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -312,9 +350,14 @@ async def latestPriceInfoForAllSymbols(exchange: str, rate_limit: str) -> dict:
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -358,9 +401,14 @@ async def latestTrades(symbol: str, number_of_data_points: int, exchange: str,
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -459,9 +507,14 @@ async def getOHLCV(symbol: str, start: str, end: str, interval: str,
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -504,9 +557,14 @@ async def getOrderBook(symbol: str, number_of_data_points: int, exchange: str,
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)
@@ -549,9 +607,14 @@ async def getOrderBookL2(symbol: str, number_of_data_points: int,
     except (ccxt.BadResponse, ccxt.NullResponse) as exception:
         await exchange_class.close()
         raise ResponseError(exception)
-    except ccxt.NetworkError as exception:
+    except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection,
+            ccxt.ExchangeNotAvailable) as exception:
         await exchange_class.close()
-        raise NetworkError(exception)
+        logger.info(
+            'Oops! Connection with {} had an issued. Will wait for 5 seconds and try to re-establish connection'
+            .format(exchange))
+        import time
+        time.sleep(5)
     except ccxt.ExchangeError as exception:
         await exchange_class.close()
         raise ExchangeError(exception)

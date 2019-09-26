@@ -118,9 +118,7 @@ def live_trade(strategy: str,
             strategy.__name__))
     except Exception as exception:
         logger.critical('Exiting {}...‼️'.format(strategy.__name__))
-        logger.error(
-            'Oops! Something went wrong while your algorithm was being deployed to live markets. ⚠️'
-        )
+        logger.error('Oops! Something went wrong ⚠️')
         raise exception
         exit()
 
