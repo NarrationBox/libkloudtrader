@@ -7,7 +7,7 @@ safety==1.8.5
 sklearn==0.0
 ta==0.4.5
 TA-Lib==0.4.17
-tabulate==0.8.3
+tabulate==0.8.5
 tox==3.13.2
 pylint==2.3.1
 pyre-check==0.0.27
