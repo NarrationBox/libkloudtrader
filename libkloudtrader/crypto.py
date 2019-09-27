@@ -776,6 +776,7 @@ def incoming_tick_data_handler(symbol: str,
                                fake_feed: bool = False):
     latest_orderbook_entry = order_book(symbol, number_of_data_points=1)
     latest_trades = trades(symbol, number_of_data_points=1)
+    latest_price=latest_price_info(symbol)
     latest_orderbook_entry_dict = {}
     latest_orderbook_entry_dict['symbol'] = symbol
     latest_orderbook_entry_dict['ask'] = latest_orderbook_entry['asks'][0][
@@ -792,6 +793,10 @@ def incoming_tick_data_handler(symbol: str,
     latest_orderbook_entry_dict['price'] = latest_trades[0]['price']
     latest_orderbook_entry_dict['tradesize'] = latest_trades[0]['amount']
     latest_orderbook_entry_dict['tradedate'] = latest_trades[0]['datetime']
+    latest_orderbook_entry_dict['open']=latest_price['open']
+    latest_orderbook_entry_dict['high']=latest_price['high']
+    latest_orderbook_entry_dict['low']=latest_price['low']
+    latest_orderbook_entry_dict['close']=latest_price['close']
     return latest_orderbook_entry_dict
 
 

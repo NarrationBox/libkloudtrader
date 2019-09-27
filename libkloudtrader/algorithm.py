@@ -1,6 +1,7 @@
 from typing import Any, List
 import random
 import time
+import datetime
 import numpy as np
 import pandas as pd
 import libkloudtrader.stocks as stocks
@@ -10,7 +11,10 @@ import libkloudtrader.processing as processing
 from libkloudtrader.logs import start_logger
 import libkloudtrader.backtest as bt
 import libkloudtrader.crypto as crypto
-import asyncio
+import libkloudtrader.analysis as analysis
+
+
+
 #pd.set_option('display.max_columns', None)  # or 1000
 #pd.set_option('display.max_rows', None)  # or 1000
 #pd.set_option('display.max_colwidth', -1)  # or 199
@@ -18,7 +22,7 @@ import asyncio
 logger = start_logger(__name__, ignore_module='libkloudtrader.analysis')
 
 
-def backtest(strategy: str,
+def run_backtest(strategy: str,
              symbol_bucket: List[str],
              data: str,
              start_date: Any,
@@ -27,7 +31,8 @@ def backtest(strategy: str,
              preferred_benchmark: str = 'SPY',
              data_interval: str = '1d',
              initial_capital: float = 100000,
-             commission: float = 0):
+             commission: float = 0,
+             slippage=True):
     """Backtester function"""
     try:
         logger.info(
@@ -37,13 +42,31 @@ def backtest(strategy: str,
         for symbol in symbol_bucket:
             data_batch = data_to_backtest_on(symbol,
                                              start_date,
+                                             end_date
+                                             )
+            batch = processing.Buffer(len(data_batch), dtype=object)
+            backtest=bt.Backtest(capital=100000,commission=1,enable_slippage=True)
+            for index, bar in data_batch.iterrows():
+                batch.append(bar)
+                backtest.update_bar(index,bar)
+                data_batch = pd.DataFrame(batch)
+                
+                locals()['strategy'](backtest,data_batch)
+            print(backtest.get_trade_log)
+        
+        '''
+        for symbol in symbol_bucket:
+            data_batch = data_to_backtest_on(symbol,
+                                             start_date,
                                              end_date,
                                              interval=data_interval)
             for symbol in symbol_bucket:
+
+              
                 a = bt.Backtest(locals()['strategy'](data_batch),
                                 preferred_price_point)
                 print(a.preferred_price_point)
-                '''
+                
                 signals=locals()['strategy'](data_batch)
                 df=pd.DataFrame()
                 df['buy']=signals['buy']
@@ -62,7 +85,7 @@ def backtest(strategy: str,
                 #df['positions in '+symbol]=100*df['positions']
                 #print(bt.trades)
 
-            logger.info("Received Signals from {}".format(strategy.__name__))
+        logger.info("Received Signals from {}".format(strategy.__name__))
 
     except (KeyboardInterrupt, SystemExit):
         print('\n')
@@ -80,16 +103,20 @@ def backtest(strategy: str,
     #print(locals()[a](symbol, start_date, end_date))
 
 
-def live_trade(strategy: str,
+def run_live(strategy: str,
                symbol_bucket: list,
                data_feed_type: str,
-               exempted_states: list = ['close'],
+               exempted_states: list = [''],
+               exempted_days:list=[''],
+               exempted_dates:list=[''],
                batch_size: int = 1000,
-               data_feed_delay: float = 0.0,
+               data_feed_delay: float = 1.0,
                fake_feed: bool = False):
     try:
         logger.info("{} is now entering the live markets. 📈\n".format(
             strategy.__name__))
+        [x.lower() for x in exempted_states]
+        [x.lower() for x in exempted_days]
         if isinstance(symbol_bucket, list):
             symbol_bucket = np.array(symbol_bucket)
         elif type(symbol_bucket) not in (numpy.ndarray, list):
@@ -97,12 +124,12 @@ def live_trade(strategy: str,
         if data_feed_type not in ('CRYPTO_live_feed', 'US_STOCKS_live_feed',
                                   'CRYPTO_live_feed_level2'):
             raise InvalidDataFeedType(
-                'This Data Feed is not available for live trading. Please use libkloudtrader.algorithm.backtest() for backtesting or using hisotrical data.'
+                'This Data Feed is not available for live trading.'
             )
         if data_feed_type in ("CRYPTO_live_feed", 'CRYPTO_live_feed_level2'):
             data_feed_delay = crypto.exchange_attribute('rateLimit')
         data_feed = Data_Types[data_feed_type].value
-        while stocks.intraday_status()['state'] not in exempted_states:
+        while stocks.intraday_status()['state'] not in exempted_states: #and datetime.datetime.now().strftime("%A").lower() not in exempted_days:
             batch = processing.Buffer(batch_size, dtype=object)
             while len(batch) < batch_size:
                 for symbol in symbol_bucket:
