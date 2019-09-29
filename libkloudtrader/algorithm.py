@@ -12,6 +12,7 @@ from libkloudtrader.logs import start_logger
 import libkloudtrader.backtest as bt
 import libkloudtrader.crypto as crypto
 import libkloudtrader.analysis as analysis
+from tqdm import tqdm
 
 
 
@@ -44,15 +45,17 @@ def run_backtest(strategy: str,
                                              start_date,
                                              end_date
                                              )
+            print(data_batch)
             batch = processing.Buffer(len(data_batch), dtype=object)
             backtest=bt.Backtest(capital=100000,commission=1,enable_slippage=True)
-            for index, bar in data_batch.iterrows():
+            for datetime, bar in data_batch.iterrows():
                 batch.append(bar)
-                backtest.update_bar(index,bar)
+                backtest.update_bar(datetime,bar)
                 data_batch = pd.DataFrame(batch)
                 
                 locals()['strategy'](backtest,data_batch)
-            print(backtest.get_trade_log)
+            #print(pd.merge(data_batch,backtest.get_portfolio,on = index))
+            #print(data_batch)
         
         '''
         for symbol in symbol_bucket:

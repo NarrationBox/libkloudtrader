@@ -45,29 +45,29 @@ class Backtest():
         self.commission=commission
         self.enable_slippage=enable_slippage
         self.slippage=0
-        self.trades_log=pd.DataFrame(columns=['datetime','trade type','price','fill price','order cost'])
+        self.trades_log=pd.DataFrame(columns=['datetime','trade_type','price','fill_price','order_cost','capital','position'])
 
     
     def buy(self,quantity):
         '''emulates a buy order'''
         self.capital-=self.order_cost
         self.update_positions(quantity)
-        self.update_trade_logs(datetime=self.bar.datetime,trade_type='Buy',price=self.bar.close,fill_price=self.fill_price,order_cost=self.order_cost)
-        print('Bought {} of stocks @ {} but price is {}'.format(quantity,self.order_cost,self.bar.close))
+        self.update_trade_logs(datetime=self.bar.datetime,trade_type='Buy',price=self.bar.close,fill_price=self.fill_price,order_cost=self.order_cost,capital=self.capital,position=self.position)
+        #print('Bought {} of stocks @ {} but price is {}'.format(quantity,self.order_cost,self.bar.close))
 
     
     def sell(self,quantity):
         '''emulates a sell order'''
-        if self.position!=0:
-            self.capital+=self.order_cost
-            self.update_positions(-1*quantity)
-            self.update_trade_logs(datetime=self.bar.datetime,trade_type='Sell',price=self.bar.close,fill_price=self.fill_price,order_cost=-1*self.order_cost)
-            print('Sold {} of stocks @ {} but price is {}'.format(quantity,self.order_cost,self.bar.close))
-        else:
-            print('No position to close')
+        #if self.position!=0:
+        self.capital+=self.order_cost
+        self.update_positions(-1*quantity)
+        self.update_trade_logs(datetime=self.bar.datetime,trade_type='Sell',price=self.bar.close,fill_price=self.fill_price,order_cost=self.order_cost,capital=self.capital,position=self.position)
+        #print('Sold {} of stocks @ {} but price is {}'.format(quantity,self.order_cost,self.bar.close))
+        #else:
+            #pass#print('No position to close')
 
-    def update_trade_logs(self,datetime,trade_type,price,fill_price,order_cost):
-        df=pd.DataFrame([{'datetime':datetime,'trade type':trade_type,'price':price,'fill price':fill_price,'order cost':order_cost}])
+    def update_trade_logs(self,datetime,trade_type,price,fill_price,order_cost,capital,position):
+        df=pd.DataFrame([{'datetime':datetime,'trade_type':trade_type,'price':price,'fill_price':fill_price,'order_cost':order_cost,'capital':capital,'position':position}])
         self.trades_log=self.trades_log.append(df)
 
 
@@ -120,3 +120,11 @@ class Backtest():
     def getposition(self):
         return self.position
 
+    @property
+    def get_portfolio(self):
+        trade_log=self.get_trade_log
+        portfolio=pd.DataFrame(index=trade_log.index)
+        portfolio['holdings']=trade_log.position.multiply(trade_log.price)
+        portfolio['cash']=trade_log.capital
+        portfolio['total']=portfolio.cash+portfolio.holdings
+        return portfolio

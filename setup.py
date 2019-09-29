@@ -17,6 +17,6 @@ setup(
         "numpy",
         "empyrical",
         "asyncio",
-        "ccxt @ git+https://github.com/kloudtrader/kloudtrader_ccxt#egg=ccxt"
+        "ccxt"
     ],
 )
