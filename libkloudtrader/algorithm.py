@@ -26,11 +26,11 @@ logger = start_logger(__name__, ignore_module='libkloudtrader.analysis')
 def run_backtest(strategy: str,
              symbol_bucket: List[str],
              data: str,
-             start_date: Any,
-             end_date: Any,
+             start: Any,
+             end: Any,
+             data_interval:str="1d",
              preferred_price_point: str = 'close',
              preferred_benchmark: str = 'SPY',
-             data_interval: str = '1d',
              initial_capital: float = 100000,
              commission: float = 0,
              slippage=True):
@@ -38,14 +38,13 @@ def run_backtest(strategy: str,
     try:
         logger.info(
             'Starting Backtest for {} from {} to {} with initial capital = {}'.
-            format(strategy.__name__, start_date, end_date, initial_capital))
+            format(strategy.__name__, start, end, initial_capital))
         data_to_backtest_on = Data_Types[data].value
         for symbol in symbol_bucket:
-            data_batch = data_to_backtest_on(symbol,
-                                             start_date,
-                                             end_date
+            data_batch = data_to_backtest_on(symbol=symbol,
+                                             start=start,
+                                             end=end,interval=data_interval
                                              )
-            print(data_batch)
             batch = processing.Buffer(len(data_batch), dtype=object)
             backtest=bt.Backtest(capital=100000,commission=1,enable_slippage=True)
             for datetime, bar in data_batch.iterrows():
@@ -54,14 +53,16 @@ def run_backtest(strategy: str,
                 data_batch = pd.DataFrame(batch)
                 
                 locals()['strategy'](backtest,data_batch)
-            #print(pd.merge(data_batch,backtest.get_portfolio,on = index))
-            #print(data_batch)
+            
+            print(backtest.get_trade_log)
+            del backtest
+            
         
         '''
         for symbol in symbol_bucket:
             data_batch = data_to_backtest_on(symbol,
-                                             start_date,
-                                             end_date,
+                                             start,
+                                             end,
                                              interval=data_interval)
             for symbol in symbol_bucket:
 
@@ -88,7 +89,7 @@ def run_backtest(strategy: str,
                 #df['positions in '+symbol]=100*df['positions']
                 #print(bt.trades)
 
-        logger.info("Received Signals from {}".format(strategy.__name__))
+        #logger.info("Received Signals from {}".format(strategy.__name__))
 
     except (KeyboardInterrupt, SystemExit):
         print('\n')
@@ -102,8 +103,8 @@ def run_backtest(strategy: str,
         raise exception
         exit()
 
-    #print(return_data_from_enum(a,symbol,start_date, end_date))
-    #print(locals()[a](symbol, start_date, end_date))
+    #print(return_data_from_enum(a,symbol,start, end))
+    #print(locals()[a](symbol, start, end))
 
 
 def run_live(strategy: str,

@@ -6,7 +6,7 @@ import numpy as np
 
 
 def ba(backtest,data):
-    '''
+
     data['high']=data.close.shift(1).rolling(window=5).max()
     data['low']=data.close.shift(1).rolling(window=5).min()
     data['avg']=analysis.ma(data.close,5)
@@ -19,8 +19,7 @@ def ba(backtest,data):
     elif sell.tail(1).bool():
         backtest.sell(5)
 
-    '''
-    pass
+
     #rets=analysis.daily_returns(data.close)
     #data['volatility']=analysis.moving_volatility(rets,1)
     #data['slip']=data.high-data.close
@@ -29,4 +28,4 @@ def ba(backtest,data):
 
     
 
-run_backtest(ba,['AAPL'],data="US_STOCKS_ohlcv",start_date='2019-01-01',end_date='2019-07-01')
+run_backtest(ba,['AAPL'],data="US_STOCKS_times_and_sale",start='2019-09-24 09:30:00',end='2019-09-24 15:30:00',data_interval='15m')

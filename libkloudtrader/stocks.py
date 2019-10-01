@@ -493,10 +493,10 @@ def ohlcv(symbol: str,
     else:
         logger.error('Oops! An error Occurred ⚠️')
         raise InvalidBrokerage
-    if interval not in ("1d", "1w", "1M", "1m", "5m", "15m"):
+    if interval not in ("1d", "1w", "1M"):
         logger.error('Oops! An error Occurred ⚠️')
         raise InvlaidTimeInterval(
-            'Invalid Time Interval. Available time intervals for this function are: "1d","1w","1M","1m","5m","15m" '
+            'Invalid Time Interval. Available time intervals for this function are: "1d","1w","1M"'
         )
     if interval == "1d":
         interval = "daily"
@@ -504,30 +504,6 @@ def ohlcv(symbol: str,
         interval = "weekly"
     elif interval == "1M":
         interval = "monthly"
-    elif interval == "1m":
-        return min1_bar_data(symbol=symbol,
-                             start=start,
-                             end=end,
-                             data_filter='open',
-                             brokerage=brokerage,
-                             access_token=access_token,
-                             dataframe=True)
-    elif interval == "5m":
-        return min5_bar_data(symbol=symbol,
-                             start=start,
-                             end=end,
-                             data_filter='open',
-                             brokerage=brokerage,
-                             access_token=access_token,
-                             dataframe=True)
-    elif interval == "15m":
-        return min15_bar_data(symbol=symbol,
-                              start=start,
-                              end=end,
-                              data_filter='open',
-                              brokerage=brokerage,
-                              access_token=access_token,
-                              dataframe=True)
     params: dict = {
         "symbol": str(symbol.upper()),
         "start": str(start),
@@ -550,6 +526,59 @@ def ohlcv(symbol: str,
             dataframe['datetime'] = pandas.to_datetime(dataframe['date'])
             dataframe.set_index(['datetime'], inplace=True)
             del dataframe['date']
+            return dataframe
+    if response.status_code == 400:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise BadRequest(response.text)
+    if response.status_code == 401:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise InvalidCredentials(response.text)
+
+def time_and_sale(symbol: str,
+          start: str,
+          end: str,
+          interval: str,
+          data_filter: str = "all",
+          brokerage: typing.Any = USER_BROKERAGE,
+          access_token: str = USER_ACCESS_TOKEN,
+          dataframe: bool = True)->dict:
+    '''get time and sale data'''
+    if brokerage == "Tradier Inc.":
+        url = TR_BROKERAGE_API_URL
+    elif brokerage == "miscpaper":
+        url = TR_SANDBOX_BROKERAGE_API_URL
+    else:
+        logger.error('Oops! An error Occurred ⚠️')
+        raise InvalidBrokerage
+    
+    if interval not in ("1m", "5m", "15m"):
+        logger.error('Oops! An error Occurred ⚠️')
+        raise InvlaidTimeInterval(
+            'Invalid Time Interval. Available time intervals for this function are: "1m", "5m", "15m"'
+        )
+    interval_dict={'1m':'1min','5m':'5min','15m':'15min'}
+    params = {
+        "symbol": str.upper(symbol),
+        "interval": interval_dict[interval],
+        "start": start,
+        "end": end,
+        "session_filter": str(data_filter),
+    }
+    response = requests.get(
+        "{}/v1/markets/timesales".format(url),
+        headers=tr_get_headers(access_token),
+        params=params,
+    )
+    if response:
+        if not dataframe:
+            return response.json()
+        else:
+            data = response.json()["series"]["data"]
+            dataframe = pandas.DataFrame(data)
+            dataframe['datetime'] = pandas.to_datetime(dataframe['time'])
+            dataframe.set_index(['datetime'], inplace=True)
+            del dataframe['time']
+            del dataframe['timestamp']
             return dataframe
     if response.status_code == 400:
         logger.error('Oops! An error Occurred ⚠️')

@@ -44,7 +44,8 @@ class Backtest():
         self.position=0
         self.commission=commission
         self.enable_slippage=enable_slippage
-        self.slippage=0
+        self.slippage=0.0
+        self.asset_price=0.0
         self.trades_log=pd.DataFrame(columns=['datetime','trade_type','price','fill_price','order_cost','capital','position'])
 
     
@@ -52,19 +53,19 @@ class Backtest():
         '''emulates a buy order'''
         self.capital-=self.order_cost
         self.update_positions(quantity)
-        self.update_trade_logs(datetime=self.bar.datetime,trade_type='Buy',price=self.bar.close,fill_price=self.fill_price,order_cost=self.order_cost,capital=self.capital,position=self.position)
+        self.update_trade_logs(datetime=self.bar.datetime,trade_type='Buy',price=self.asset_price,fill_price=self.fill_price,order_cost=self.order_cost,capital=self.capital,position=self.position)
         #print('Bought {} of stocks @ {} but price is {}'.format(quantity,self.order_cost,self.bar.close))
 
     
     def sell(self,quantity):
         '''emulates a sell order'''
-        #if self.position!=0:
-        self.capital+=self.order_cost
-        self.update_positions(-1*quantity)
-        self.update_trade_logs(datetime=self.bar.datetime,trade_type='Sell',price=self.bar.close,fill_price=self.fill_price,order_cost=self.order_cost,capital=self.capital,position=self.position)
+        if self.position!=0:
+            self.capital+=self.order_cost
+            self.update_positions(-1*quantity)
+            self.update_trade_logs(datetime=self.bar.datetime,trade_type='Sell',price=self.asset_price,fill_price=self.fill_price,order_cost=self.order_cost,capital=self.capital,position=self.position)
         #print('Sold {} of stocks @ {} but price is {}'.format(quantity,self.order_cost,self.bar.close))
-        #else:
-            #pass#print('No position to close')
+        else:
+            print('No position to close')
 
     def update_trade_logs(self,datetime,trade_type,price,fill_price,order_cost,capital,position):
         df=pd.DataFrame([{'datetime':datetime,'trade_type':trade_type,'price':price,'fill_price':fill_price,'order_cost':order_cost,'capital':capital,'position':position}])
@@ -79,29 +80,30 @@ class Backtest():
     def update_bar(self,index,bar):
         self.bar=bar
         self.bar.datetime=index
+        if 'price' in self.bar:
+            self.asset_price=self.bar.price
+        else:
+            self.asset_price=self.bar.close
 
     def update_positions(self,quantity):
         self.position+=quantity
 
     @property
     def calculate_commission(self):
-        commiss=(self.commission/100)*self.bar.close
-        return commiss
+        return (self.commission/100)*self.fill_price
+         
 
     @property
     def calculate_slippage(self):
         '''how is slippage calculated?'''
         '''slippage should not be more than 2% in most of the trades. so we generate a random percentage b/w 0-2.use that number as %age'''
         if self.enable_slippage:
-            slippage_percent= np.random.uniform(low=0, high=0.02)
-            slippage=slippage_percent*self.bar.close
-            return slippage
+            return np.random.uniform(low=0, high=0.02)*self.asset_price
         return 0.0
     
     @property   
     def fill_price(self):
-        return self.bar.close+self.calculate_slippage
-        
+        return self.asset_price+self.calculate_slippage        
 
     @property   
     def order_cost(self):
