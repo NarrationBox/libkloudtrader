@@ -1,4 +1,4 @@
-boto3==1.11.15
+boto3==1.12.19
 empyrical==0.5.0
 pyre-check==0.0.39
 pytest==4.6.3
