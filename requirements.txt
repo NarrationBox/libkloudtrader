@@ -1,7 +1,7 @@
 boto3==1.12.43
 empyrical==0.5.0
 pyre-check==0.0.39
-pytest==4.6.3
+pytest==5.4.1
 pyti==0.2.2
 safety==1.8.7
 sklearn==0.0
@@ -11,7 +11,7 @@ tabulate==0.8.3
 tox==3.13.2
 pylint==2.3.1
 pyre-check==0.0.39
-pytest==4.6.3
+pytest==5.4.1
 pyti==0.2.2
 safety==1.8.7
 yapf==0.27.0
