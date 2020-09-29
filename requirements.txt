@@ -6,7 +6,7 @@ pyti==0.2.2
 safety==1.8.7
 sklearn==0.0
 ta==0.5.22
-TA-Lib==0.4.17
+TA-Lib==0.4.19
 tabulate==0.8.3
 tox==3.13.2
 pylint==2.3.1
